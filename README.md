@@ -18,9 +18,9 @@
 	- [x] - Activate themes and plugins.
 	- [ ] - Add custom host name.
 	- [ ] - override existing host name if already exists in wordpress.
-	- [ ] - Add multisite support.
+	- [x] - Add multisite support.
 	- [ ] - Add xdebug support.
-	- [ ] - download plugins and themes from links during start.
+	- [x] - download plugins and themes from links during start.
 - [x] - Configurations with JSON file.
 - [ ] - Test environment.
 - [ ] - Build environment.

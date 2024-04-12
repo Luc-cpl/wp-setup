@@ -1,5 +1,5 @@
 import { Edge } from 'edge.js'
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 import { createDir, path } from '../helpers/fs.mjs';
 

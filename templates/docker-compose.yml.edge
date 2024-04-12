@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  wordpress:
+  wp:
     build:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
@@ -11,10 +11,10 @@ services:
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
     depends_on:
-      - "wp-cli"
+      - "database"
     ports:
       - 80:80
-      - 443:443    
+      - 443:443
     restart: "unless-stopped"
     volumes:
       - "wp:/var/www/html:rw"
@@ -29,7 +29,9 @@ services:
       @end
 
   wp-cli:
-    image: "wordpress:cli"
+    build:
+      context: {{root}}docker/wordpress-cli
+      dockerfile: Dockerfile
     command: sleep infinity
     environment:
       VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
@@ -38,7 +40,7 @@ services:
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
     depends_on:
-      - "database"
+      - "wp"
     restart: "unless-stopped"
     user: 33:33
     volumes:

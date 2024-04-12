@@ -16,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^12.0.0",
-    "edge.js": "^6.0.2"
+    "edge.js": "^6.0.2",
+    "unzipper": "^0.10.14"
   }
 }

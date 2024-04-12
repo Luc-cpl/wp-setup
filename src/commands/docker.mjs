@@ -1,38 +1,15 @@
 import { exit } from 'process';
-import { readFileSync } from 'fs';
 import { confirm } from "../helpers/cli.mjs";
 import { render, save } from '../services/template.mjs';
-import { exec, getProjectName } from "../services/docker.mjs";
-import { parseVolume } from '../helpers/docker.mjs';
-import { download, path, rm } from '../helpers/fs.mjs';
-
-const getExternalVolumeFiles = async (volumes, type) => {
-	const tmpDir = path('build/tmp');
-	const destination = path(`build/${type}s`);
-
-	const promises = volumes.map(async volume => {
-		if (!volume.host.startsWith('http')) {
-			return volume;
-		}
-		
-		const url = volume.host;
-		const fileName = url.split('/').pop();
-		const tmpFile = `${tmpDir}/${fileName}`;
-		const file = await download(url, tmpFile);
-
-		rm(tmpFile);
-	});
-	
-	return Promise.all(promises);
-}
+import { exec } from "../services/docker.mjs";
+import { getExternalVolumeFiles, getProjectName, parseVolume } from '../helpers/docker.mjs';
+import { getJsonFile } from '../helpers/fs.mjs';
 
 export const start = async (options) => {
-	const setup = JSON.parse(readFileSync(`${process.cwd()}/wp-setup.json`, 'utf8'));
-	options = {...setup, ...options};
+	const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
+	options = {...options, ...setupFile};
 
-	const pluralizedSetup = ['plugins', 'themes', 'volumes'];
-
-	pluralizedSetup.forEach(plural => {
+	['plugins', 'themes', 'volumes'].forEach(plural => {
 		if (options[plural] && Array.isArray(options[plural])) {
 			const singular = plural.slice(0, -1);
 			options[singular] = [
@@ -76,7 +53,7 @@ export const start = async (options) => {
 				'--admin_password=password',
 				'--admin_email=admin@email.com',
 			];
-			exec(`exec wp-cli wp core install ${flags.join(' ')}`);
+			exec(`exec wp-cli wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
 			installed = true;
 		} catch (error) {
 			await new Promise(resolve => setTimeout(resolve, 1000));
@@ -86,12 +63,24 @@ export const start = async (options) => {
 	if (options.multisite) {
 		const type = options.multisite === true ? 'subdirectory' : options.multisite;
 		const subdomain = type === 'subdomain' ? '--subdomains' : '';
-		exec(`exec wp-cli wp core multisite-convert ${subdomain}`);
+		try {
+			exec(`exec wp-cli wp core multisite-convert ${subdomain}`);
+		} catch (e) {}
 	}
+
+	// Ensure we can write to the wp-content directory
+	exec('run --rm --user root wp-cli chown 33:33 wp-content', null, { stdio: 'pipe' });
+
+	try {
+		exec('exec wp-cli wp theme install twentytwentyfour', null, { stdio: 'pipe' });
+		exec('exec wp-cli wp plugin delete hello akismet', null, { stdio: 'pipe' });
+		exec('exec wp-cli wp theme delete twentytwentythree twentytwentytwo', null, { stdio: 'pipe' });
+	} catch (e) {}
 
 	const plugins = options.plugin ?? [];
 	plugins.forEach(plugin => {
-		exec(`exec wp-cli wp plugin activate ${plugin.container}`);
+		const multisite = options.multisite ? '--network' : '';
+		exec(`exec wp-cli wp plugin activate ${plugin.container} ${multisite}`);
 	});
 
 	const themes = options.theme ?? [];
@@ -99,12 +88,13 @@ export const start = async (options) => {
 		exec(`exec wp-cli wp theme activate ${theme.container}`);
 	});
 
-	console.log('-----------------------------------------------------------');
+	console.log('');
+	console.log('============================================================');
 	console.log('All ready! Enjoy your WordPress development environment.');
 	console.log(`- Site: http://${options.host}`);
 	console.log(`- User: admin`);
 	console.log(`- Password: password`);
-	console.log('-----------------------------------------------------------');
+	console.log('============================================================');
     exit(0);
 }
 

@@ -1,11 +1,10 @@
 import { pipeline } from 'stream';
-import { createWriteStream, createReadStream, mkdirSync, existsSync } from 'fs';
+import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { createGunzip } from 'zlib';
-// import { createExtract } from 'tar';
 import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
+import unzipper from 'unzipper';
 
 export const path = (path = '') => {
 	const __filename = fileURLToPath(import.meta.url);
@@ -38,19 +37,15 @@ export const download = async (url, dest) => {
 	});
 }
 
-export const extract = async (file, dest) => {
-	return new Promise((resolve, reject) => {
-		const extract = createExtract({ cwd: dest });
-		const archive = createReadStream(file);
-		const gunzip = createGunzip();
+export const exists = (path) => {
+	return existsSync(path);
+}
 
-		pipeline(archive, gunzip, extract, error => {
-			if (error) {
-				reject(error);
-			}
-			resolve(dest);
-		});
-	});
+export const extract = async (file, dest) => {
+	return createReadStream(file)
+		.pipe(unzipper.Extract({ path: dest }))
+		.on('entry', entry => entry.autodrain())
+		.promise();
 }
 
 export const rm = async (fileOrPath) => {
@@ -66,4 +61,8 @@ export const createDir = (path) => {
 		}
 		return acc;
 	}, '');
+}
+
+export const getJsonFile = (file) => {
+	return JSON.parse(readFileSync(file, 'utf8'));
 }

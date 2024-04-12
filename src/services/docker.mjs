@@ -1,22 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
-import { path } from '../helpers/fs.mjs';
-
-let files = [];
-
-const getComposeFiles = () => {
-	if (files.length) {
-		return files;
-	}
-
-	const jsonFile = path('build/docker-compose-files.json');
-	files = JSON.parse(readFileSync(jsonFile));
-	return files;
-}
-
-export const getProjectName = () => {
-	return process.cwd().split('/').pop().toLowerCase().replace(/[^a-z0-9]/gi, '-');
-}
+import { getComposeFiles, getProjectName } from '../helpers/docker.mjs';
 
 export const exec = (command, files = null, options = { stdio: 'inherit' }) => {
 	files = files ?? getComposeFiles();
