@@ -6,6 +6,30 @@
 - **FrankenPHP** - The Modern PHP App Server, written in Go.
 - **WP-CLI** - The command line interface for WordPress.
 
+### Add custom config file
+
+To easily load your configuration, you can create a `wp-setup.json` file in the root of your project.
+Following you can see the available options, change them according to your needs.
+
+```json
+// wp-setup.json
+{
+	"include": "path/to/your/docker-compose-override.yml",
+	"multisite": true,
+	"plugins": [
+		"${PWD}:my-plugin",
+		"https://downloads.wordpress.org/plugin/query-monitor.zip:query-monitor"
+	],
+	"themes": [
+		"${PWD}:my-theme",
+		"https://downloads.wordpress.org/theme/twentytwenty.zip:twentytwenty"
+	],
+	"volumes": [
+		"${PWD}/uploads:/var/www/html/wp-content/uploads"
+	]
+}
+```
+
 ### Todo
 
 - [x] - Start Command
