@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
+import { parseVolume } from './src/helpers/docker.mjs';
 
 import * as docker from './src/commands/docker.mjs';
 
-export const parseVolumes = (value, previous) => {
-	value = value.split(':');
-	const [host, container] = value;
-	return [...previous ?? [], { host, container }];
+const parseVolumes = (value, previous) => {
+	return [...previous ?? [], parseVolume(value)];
 }
 
 program.command('start')

@@ -1,12 +1,12 @@
 {
-  "name": "@luccpl/wp-env",
+  "name": "@luccpl/wp-setup",
   "version": "1.0.0",
   "description": "A simple WordPress development environment",
   "scripts": {
     "test": "zx ./index.mjs"
   },
   "bin": {
-    "my-env": "index.mjs"
+    "wp-setup": "index.mjs"
   },
   "engines": {
     "node": ">=16.0.0"

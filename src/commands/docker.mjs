@@ -1,9 +1,56 @@
 import { exit } from 'process';
-import { confirm } from "../helpers.mjs";
+import { readFileSync } from 'fs';
+import { confirm } from "../helpers/cli.mjs";
 import { render, save } from '../services/template.mjs';
 import { exec, getProjectName } from "../services/docker.mjs";
+import { parseVolume } from '../helpers/docker.mjs';
+import { download, path, rm } from '../helpers/fs.mjs';
+
+const getExternalVolumeFiles = async (volumes, type) => {
+	const tmpDir = path('build/tmp');
+	const destination = path(`build/${type}s`);
+
+	const promises = volumes.map(async volume => {
+		if (!volume.host.startsWith('http')) {
+			return volume;
+		}
+		
+		const url = volume.host;
+		const fileName = url.split('/').pop();
+		const tmpFile = `${tmpDir}/${fileName}`;
+		const file = await download(url, tmpFile);
+
+		rm(tmpFile);
+	});
+	
+	return Promise.all(promises);
+}
 
 export const start = async (options) => {
+	const setup = JSON.parse(readFileSync(`${process.cwd()}/wp-setup.json`, 'utf8'));
+	options = {...setup, ...options};
+
+	const pluralizedSetup = ['plugins', 'themes', 'volumes'];
+
+	pluralizedSetup.forEach(plural => {
+		if (options[plural] && Array.isArray(options[plural])) {
+			const singular = plural.slice(0, -1);
+			options[singular] = [
+				...options[singular] ?? [],
+				...options[plural].map(parseVolume),
+			];
+			delete options[plural];
+		}
+	});
+
+	const volumes = await Promise.all(['plugin', 'theme', 'volume'].map(async type =>{
+		return getExternalVolumeFiles(options[type] ?? [], type);
+	}));
+
+	options.plugin = volumes[0];
+	options.theme = volumes[1];
+	options.volume = volumes[2];
+
     const content = await render('docker-compose.yml', options);
     const file = await save('docker-compose.yml', content);
 

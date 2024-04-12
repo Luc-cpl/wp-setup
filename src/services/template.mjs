@@ -1,7 +1,7 @@
 import { Edge } from 'edge.js'
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
-import { path } from '../helpers.mjs';
+import { createDir, path } from '../helpers/fs.mjs';
 
 export const render = async (template, options) => {
 	const edge = Edge.create();
@@ -14,13 +14,7 @@ export const save = async (file, content) => {
 	file = path('build/' + file);
 
 	const folders = file.split('/').slice(0, -1);
-	folders.reduce((acc, folder) => {
-		acc += folder + '/';
-		if (!existsSync(acc)) {
-			mkdirSync(acc);
-		}
-		return acc;
-	}, '');
+	createDir(folders.join('/'));
 
 	writeFileSync(file, content);
 

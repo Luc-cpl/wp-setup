@@ -21,7 +21,7 @@
 	- [ ] - Add multisite support.
 	- [ ] - Add xdebug support.
 	- [ ] - download plugins and themes from links during start.
-- [ ] - Configurations with JSON file.
+- [x] - Configurations with JSON file.
 - [ ] - Test environment.
 - [ ] - Build environment.
 - [x] - Destroy Command

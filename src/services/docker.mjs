@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
-import { path } from '../helpers.mjs';
+import { path } from '../helpers/fs.mjs';
 
 let files = [];
 
