@@ -26,9 +26,7 @@ RUN sed -i \
     -e 's/php-fpm/frankenphp/g' \
     /usr/local/bin/docker-entrypoint.sh
 
-RUN sed -i \
-    -e 's#root \* public/#root \* /var/www/html/#g' \
-    /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/
 
 USER ${USER}
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

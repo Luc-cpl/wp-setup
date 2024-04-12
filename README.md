@@ -14,6 +14,7 @@ Following you can see the available options, change them according to your needs
 ```json
 // wp-setup.json
 {
+	"host": "my-wordpress.localhost",
 	"include": "path/to/your/docker-compose-override.yml",
 	"multisite": true,
 	"plugins": [
@@ -40,7 +41,8 @@ Following you can see the available options, change them according to your needs
 	- [x] - Ensure same configuration on commands.
 	- [x] - Add custom project name.
 	- [x] - Activate themes and plugins.
-	- [ ] - Add custom host name.
+	- [x] - Add custom host name.
+	- [ ] - Edit /etc/hosts file to add custom host name.
 	- [ ] - override existing host name if already exists in wordpress.
 	- [x] - Add multisite support.
 	- [ ] - Add xdebug support.

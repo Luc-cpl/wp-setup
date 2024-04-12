@@ -6,6 +6,7 @@ services:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
     environment:
+      SERVER_NAME: "{{host}}"
       WORDPRESS_DB_HOST: "database"
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
