@@ -64,5 +64,9 @@ export const createDir = (path) => {
 }
 
 export const getJsonFile = (file) => {
-	return JSON.parse(readFileSync(file, 'utf8'));
+	try {
+		return JSON.parse(readFileSync(file, 'utf8'));
+	} catch (error) {
+		return false;
+	}
 }

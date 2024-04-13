@@ -91,7 +91,7 @@ export const start = async (options) => {
 	console.log('');
 	console.log('============================================================');
 	console.log('All ready! Enjoy your WordPress development environment.');
-	console.log(`- Site: http://${options.host}`);
+	console.log(`- Site: https://${options.host}`);
 	console.log(`- User: admin`);
 	console.log(`- Password: password`);
 	console.log('============================================================');
