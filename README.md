@@ -15,7 +15,7 @@ Following you can see the available options, change them according to your needs
 // wp-setup.json
 {
 	"host": "my-wordpress.localhost",
-	"include": "path/to/your/docker-compose-override.yml",
+	"include": "./docker-compose-override.yml",
 	"multisite": true,
 	"plugins": [
 		"${PWD}:my-plugin",
