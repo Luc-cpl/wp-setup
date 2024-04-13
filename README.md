@@ -1,4 +1,4 @@
-# A simple and powerful WordPress environment (under initial development)
+# A simple and powerful WordPress environment
 
 ## Features
 
@@ -9,7 +9,7 @@
 ## Pre-requisites
 
 - [Docker](https://docs.docker.com/get-docker/)
-- [Node.js](https://nodejs.org/en/download/) >= 16 (16 can throw some warnings during installation but it should work fine)
+- [Node.js](https://nodejs.org/en/download/) >= 16 (16 may throw warnings during installation but it should work fine)
 
 ## Installation
 
