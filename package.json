@@ -1,6 +1,6 @@
 {
   "name": "@luc-cpl/wp-setup",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple WordPress development environment",
   "scripts": {
     "test": "zx ./index.mjs"
