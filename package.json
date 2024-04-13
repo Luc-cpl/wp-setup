@@ -1,5 +1,5 @@
 {
-  "name": "@luccpl/wp-setup",
+  "name": "@luc-cpl/wp-setup",
   "version": "1.0.0",
   "description": "A simple WordPress development environment",
   "scripts": {
