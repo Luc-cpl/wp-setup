@@ -15,7 +15,14 @@
 
 {$CADDY_EXTRA_CONFIG}
 
-{$SERVER_NAME:localhost}, *.{$SERVER_NAME:localhost} {
+test.{$SERVER_NAME:test.localhost}, *.test.{$SERVER_NAME:test.localhost} {
+	reverse_proxy * wp-test:8080 {
+        header_up Host {host} # redundant
+        header_up X-Real-IP {remote}
+    }
+}
+
+:8080, {$SERVER_NAME:localhost}, *.{$SERVER_NAME:localhost} {
 	root * /var/www/html/
 	encode zstd br gzip
 

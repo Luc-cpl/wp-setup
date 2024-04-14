@@ -16,7 +16,6 @@ program.command('start')
   .option('-t, --theme <directory:name...>', 'Themes to include in the development environment.', parseVolumes)
   .option('-v, --volume <host:container...>', 'Additional volumes to include in the development environment.', parseVolumes)
   .option('--host <host>', 'The host to expose the development environment on.', 'localhost')
-  .option('--test-host <host>', 'The host to expose the test environment on.', 'test.localhost')
   .option('--xdebug', 'Enable XDebug for the development environment.', false)
   .option('--multisite [type]', 'Enable multisite for the development environment (subdomain or subdirectory, defaults to subdirectory).', false)
   .action(docker.start);

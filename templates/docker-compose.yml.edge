@@ -29,6 +29,31 @@ services:
       - "{{bind.host}}:${{bind.container}}:ro"
       @end
 
+  wp-test:
+    build:
+      context: {{root}}docker/wordpress
+      dockerfile: Dockerfile
+    environment:
+      SERVER_NAME: "test.{{host}}"
+      WORDPRESS_DB_HOST: "database-test"
+      WORDPRESS_DB_NAME: "wordpress"
+      WORDPRESS_DB_PASSWORD: ""
+      WORDPRESS_DB_USER: "root"
+    depends_on:
+      - "database-test"
+    restart: "unless-stopped"
+    volumes:
+      - "wp-test:/var/www/html:rw"
+      @each(bind in plugin)
+      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
+      @end
+      @each(bind in theme)
+      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
+      @end
+      @each(bind in volume)
+      - "{{bind.host}}:${{bind.container}}:ro"
+      @end
+
   wp-cli:
     build:
       context: {{root}}docker/wordpress-cli
@@ -56,6 +81,33 @@ services:
       - "{{bind.host}}:${{bind.container}}:ro"
       @end
 
+  wp-test-cli:
+    build:
+      context: {{root}}docker/wordpress-cli
+      dockerfile: Dockerfile
+    command: sleep infinity
+    environment:
+      VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
+      WORDPRESS_DB_HOST: "database-test"
+      WORDPRESS_DB_NAME: "wordpress"
+      WORDPRESS_DB_PASSWORD: ""
+      WORDPRESS_DB_USER: "root"
+    depends_on:
+      - "wp-test"
+    restart: "unless-stopped"
+    user: 33:33
+    volumes:
+      - "wp-test:/var/www/html:rw"
+      @each(bind in plugin)
+      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
+      @end
+      @each(bind in theme)
+      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
+      @end
+      @each(bind in volume)
+      - "{{bind.host}}:${{bind.container}}:ro"
+      @end
+
   database:
     image: "mariadb"
     volumes:
@@ -66,6 +118,15 @@ services:
       MYSQL_ROOT_PASSWORD: ""    
     restart: "unless-stopped"
 
+  database-test:
+    image: "mariadb"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "wordpress"
+      MYSQL_ROOT_PASSWORD: ""    
+    restart: "unless-stopped"
+
 volumes:
   wp:
+  wp-test:
   database:

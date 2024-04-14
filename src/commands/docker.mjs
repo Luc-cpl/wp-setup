@@ -5,6 +5,53 @@ import { exec } from "../services/docker.mjs";
 import { getExternalVolumeFiles, getProjectName, parseVolume } from '../helpers/docker.mjs';
 import { getJsonFile } from '../helpers/fs.mjs';
 
+const setupWP = async ({cliContainer, host, multisite, plugin, theme}) => {
+	let installed = false;
+	while (!installed) {
+		try {
+			const flags = [
+				'--url=' + host,
+				'--title="' + process.cwd().split('/').pop() + '"',
+				'--admin_user=admin',
+				'--admin_password=password',
+				'--admin_email=admin@email.com',
+			];
+			exec(`exec ${cliContainer} wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
+			installed = true;
+		} catch (error) {
+			await new Promise(resolve => setTimeout(resolve, 1000));
+		}
+	}
+
+	if (multisite) {
+		const type = multisite === true ? 'subdirectory' : multisite;
+		const subdomain = type === 'subdomain' ? '--subdomains' : '';
+		try {
+			exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
+		} catch (e) {}
+	}
+
+	// Ensure we can write to the wp-content directory
+	exec(`run --rm --user root ${cliContainer} chown 33:33 wp-content`, null, { stdio: 'pipe' });
+
+	try {
+		exec(`exec ${cliContainer} wp theme install twentytwentyfour`, null, { stdio: 'pipe' });
+		exec(`exec ${cliContainer} wp plugin delete hello akismet`, null, { stdio: 'pipe' });
+		exec(`exec ${cliContainer} wp theme delete twentytwentythree twentytwentytwo`, null, { stdio: 'pipe' });
+	} catch (e) {}
+
+	const plugins = plugin ?? [];
+	plugins.forEach(plugin => {
+		const multisiteFlag = multisite ? '--network' : '';
+		exec(`exec ${cliContainer} wp plugin activate ${plugin.container} ${multisiteFlag}`);
+	});
+
+	const themes = theme ?? [];
+	themes.forEach(theme => {
+		exec(`exec ${cliContainer} wp theme activate ${theme.container}`);
+	});
+}
+
 export const start = async (options) => {
 	const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 	options = {...options, ...setupFile};
@@ -43,55 +90,16 @@ export const start = async (options) => {
 
 	console.log(`Project started. Waiting for services to be ready...`);
 
-	let installed = false;
-	while (!installed) {
-		try {
-			const flags = [
-				'--url=' + options.host,
-				'--title=' + getProjectName(),
-				'--admin_user=admin',
-				'--admin_password=password',
-				'--admin_email=admin@email.com',
-			];
-			exec(`exec wp-cli wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
-			installed = true;
-		} catch (error) {
-			await new Promise(resolve => setTimeout(resolve, 1000));
-		}
-	}
-
-	if (options.multisite) {
-		const type = options.multisite === true ? 'subdirectory' : options.multisite;
-		const subdomain = type === 'subdomain' ? '--subdomains' : '';
-		try {
-			exec(`exec wp-cli wp core multisite-convert ${subdomain}`);
-		} catch (e) {}
-	}
-
-	// Ensure we can write to the wp-content directory
-	exec('run --rm --user root wp-cli chown 33:33 wp-content', null, { stdio: 'pipe' });
-
-	try {
-		exec('exec wp-cli wp theme install twentytwentyfour', null, { stdio: 'pipe' });
-		exec('exec wp-cli wp plugin delete hello akismet', null, { stdio: 'pipe' });
-		exec('exec wp-cli wp theme delete twentytwentythree twentytwentytwo', null, { stdio: 'pipe' });
-	} catch (e) {}
-
-	const plugins = options.plugin ?? [];
-	plugins.forEach(plugin => {
-		const multisite = options.multisite ? '--network' : '';
-		exec(`exec wp-cli wp plugin activate ${plugin.container} ${multisite}`);
-	});
-
-	const themes = options.theme ?? [];
-	themes.forEach(theme => {
-		exec(`exec wp-cli wp theme activate ${theme.container}`);
-	});
+	await Promise.all([
+		setupWP({...options, cliContainer: 'wp-cli'}),
+		setupWP({...options, host: `test.${options.host}`, cliContainer: 'wp-test-cli'}),
+	]);
 
 	console.log('');
 	console.log('============================================================');
 	console.log('All ready! Enjoy your WordPress development environment.');
 	console.log(`- Site: https://${options.host}`);
+	console.log(`- Test Site: https://test.${options.host}`);
 	console.log(`- User: admin`);
 	console.log(`- Password: password`);
 	console.log('============================================================');

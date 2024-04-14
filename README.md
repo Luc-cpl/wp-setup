@@ -145,7 +145,6 @@ npm run env:wp <command>
 	- [x] - Activate themes and plugins.
 	- [x] - Add custom host name.
 	- [ ] - Edit /etc/hosts file to add custom host name.
-	- [ ] - override existing host name if already exists in wordpress.
 	- [x] - Add multisite support.
 	- [ ] - Add xdebug support.
 	- [x] - download plugins and themes from links during start.
@@ -157,6 +156,7 @@ npm run env:wp <command>
 - [x] - Run Command
 - [x] - WP CLI Command
 - [ ] - Composer Command
+- [x] - Prefix the project name to avoid naming collisions.
 
 ## License
 

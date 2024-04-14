@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import crypto from 'crypto';
 import { download, exists, extract, path, rm } from './fs.mjs';
 
 let files = [];
@@ -14,7 +15,8 @@ export const getComposeFiles = () => {
 }
 
 export const getProjectName = () => {
-	return process.cwd().split('/').pop().toLowerCase().replace(/[^a-z0-9]/gi, '-');
+	const hash = crypto.createHash('md5').update(process.cwd()).digest('hex').slice(0, 6);
+	return hash + '-' + process.cwd().split('/').pop().toLowerCase().replace(/[^a-z0-9]/gi, '-');
 }
 
 export const parseVolume = (value) => {
