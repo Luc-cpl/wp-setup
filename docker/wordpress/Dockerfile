@@ -15,11 +15,12 @@ COPY --from=wordpress /usr/local/etc/php/conf.d/* /usr/local/etc/php/conf.d/
 COPY --from=wordpress /usr/local/bin/docker-entrypoint.sh /usr/local/bin/
 COPY --from=wordpress --chown=root:root /usr/src/wordpress /usr/src/wordpress
 
+RUN chown -R root:root /data/caddy /config/caddy && chmod -R 777 /data/caddy /config/caddy
+
 WORKDIR /var/www/html
 VOLUME /var/www/html
 
 ARG USER=www-data
-RUN chown -R ${USER}:${USER} /data/caddy && chown -R ${USER}:${USER} /config/caddy
 
 RUN sed -i \
     -e 's/\[ "$1" = "php-fpm" \]/\[\[ "$1" == frankenphp* \]\]/g' \

@@ -5,6 +5,7 @@ services:
     build:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
+    user: "${UID}:${GID}"
     environment:
       SERVER_NAME: "{{host}}"
       WORDPRESS_DB_HOST: "database"
@@ -33,6 +34,7 @@ services:
     build:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
+    user: "${UID}:${GID}"
     environment:
       SERVER_NAME: "test.{{host}}"
       WORDPRESS_DB_HOST: "database-test"
@@ -58,6 +60,7 @@ services:
     build:
       context: {{root}}docker/wordpress-cli
       dockerfile: Dockerfile
+    user: "${UID}:${GID}"
     command: sleep infinity
     environment:
       VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
@@ -68,23 +71,23 @@ services:
     depends_on:
       - "wp"
     restart: "unless-stopped"
-    user: 33:33
     volumes:
       - "wp:/var/www/html:rw"
       @each(bind in plugin)
-      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
+      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}"
       @end
       @each(bind in theme)
-      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
+      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
       @each(bind in volume)
-      - "{{bind.host}}:${{bind.container}}:ro"
+      - "{{bind.host}}:${{bind.container}}"
       @end
 
   wp-test-cli:
     build:
       context: {{root}}docker/wordpress-cli
       dockerfile: Dockerfile
+    user: "${UID}:${GID}"
     command: sleep infinity
     environment:
       VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
@@ -95,17 +98,16 @@ services:
     depends_on:
       - "wp-test"
     restart: "unless-stopped"
-    user: 33:33
     volumes:
       - "wp-test:/var/www/html:rw"
       @each(bind in plugin)
-      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
+      - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}"
       @end
       @each(bind in theme)
-      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
+      - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
       @each(bind in volume)
-      - "{{bind.host}}:${{bind.container}}:ro"
+      - "{{bind.host}}:${{bind.container}}"
       @end
 
   database:

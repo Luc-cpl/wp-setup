@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import { exit } from 'process';
 import { confirm } from "../helpers/cli.mjs";
 import { render, save } from '../services/template.mjs';
@@ -32,8 +33,11 @@ const setupWP = async ({cliContainer, host, multisite, plugin, theme}) => {
 		} catch (e) {}
 	}
 
+	const uid = process.env.UID ?? 33;
+	const gid = process.env.GID ?? 33;
+
 	// Ensure we can write to the wp-content directory
-	exec(`run --rm --user root ${cliContainer} chown 33:33 wp-content`, null, { stdio: 'pipe' });
+	exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`, null, { stdio: 'pipe' });
 
 	try {
 		exec(`exec ${cliContainer} wp theme install twentytwentyfour`, null, { stdio: 'pipe' });
@@ -86,6 +90,13 @@ export const start = async (options) => {
     }
 
     save('docker-compose-files.json', JSON.stringify(files));
+
+	const uid = execSync('id -u', { stdio: 'pipe' }).toString().trim();
+	const gid = execSync('id -g', { stdio: 'pipe' }).toString().trim();
+
+	// Set the env vars for the user id and group id
+	process.env.UID = uid;
+	process.env.GID = gid;
 
     exec(`up -d --build --remove-orphans`, files, { stdio: 'inherit' });
 
