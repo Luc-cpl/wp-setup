@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import crypto from 'crypto';
 import { download, exists, extract, path, rm } from './fs.mjs';
+import { join } from 'path';
 
 let files = [];
 
@@ -20,11 +21,16 @@ export const getProjectName = () => {
 }
 
 export const parseVolume = (value) => {
-  value = value.split(':');
-  const [host, container] = value.length > 2
-    ? [value.slice(0, -1).join(':'), value[value.length - 1]]
-    : value;
-  return { host, container };
+	value = value.split(':');
+	let [host, container] = value.length > 2
+		? [value.slice(0, -1).join(':'), value[value.length - 1]]
+		: value;
+
+	if (host.startsWith('.') || (!host.startsWith('http') && host.match(/^[a-z0-9]/i))) {
+		host = join(process.cwd(), host);
+	}
+
+ 	return { host, container };
 }
 
 export const getExternalVolumeFiles = async (volumes, type) => {

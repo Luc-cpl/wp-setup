@@ -1,7 +1,11 @@
 {
   "name": "@luc-cpl/wp-setup",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple WordPress development environment",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Luc-cpl/wp-setup"
+  },
   "scripts": {
 
   },

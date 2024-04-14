@@ -2,8 +2,9 @@ import { exit } from 'process';
 import { confirm } from "../helpers/cli.mjs";
 import { render, save } from '../services/template.mjs';
 import { exec } from "../services/docker.mjs";
-import { getExternalVolumeFiles, getProjectName, parseVolume } from '../helpers/docker.mjs';
+import { getExternalVolumeFiles, parseVolume } from '../helpers/docker.mjs';
 import { getJsonFile } from '../helpers/fs.mjs';
+import { join } from 'path';
 
 const setupWP = async ({cliContainer, host, multisite, plugin, theme}) => {
 	let installed = false;
@@ -117,24 +118,43 @@ export const stop = async () => {
 	exit(0);
 }
 
-export const run = async (service, command) => {
+export const run = async (service, command, { workdir }) => {
 	const services = exec('config --services', null, { stdio: 'pipe' }).toString().split('\n');
+	const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 
 	if (!services.includes(service)) {
 		console.error(`The service "${service}" does not exist.`);
 		exit(1);
 	}
 
+	if (workdir && setupFile && !workdir.startsWith('/')) {
+		const setContainerPath = (volume, basePath = '') => ({
+			host: volume.host.includes('${PWD}') ? volume.host.replace('${PWD}', process.cwd()) : volume.host,
+			container: basePath + volume.container,
+		});
+
+		const plugins = (setupFile.plugins ?? []).map(parseVolume)
+			.map(volume => setContainerPath(volume, '/var/www/html/wp-content/plugins/'));
+		const themes = (setupFile.themes ?? []).map(parseVolume)
+			.map(volume => setContainerPath(volume, '/var/www/html/wp-content/themes/'));
+		const volumes = (setupFile.themes ?? []).map(parseVolume)
+			.map(volume => setContainerPath(volume));
+		const directory = join(process.cwd(), workdir);
+		workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
+	}
+
 	const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString())
 		.filter(service => service.State === 'running')
 		.map(service => service.Service);
 
+	const workdirCall = workdir ? `--workdir="${workdir}"` : '';
+
 	try {
 		if (running.includes(service)) {
-			exec(`exec ${service} ${command.join(' ')}`);
+			exec(`exec ${workdirCall} ${service} ${command.join(' ')}`);
 			exit(0);
 		}
-		exec(`run --rm ${service} ${command.join(' ')}`);
+		exec(`run --rm ${workdirCall} ${service} ${command.join(' ')}`);
 		exit(0);
 	} catch (error) {
 		console.error(error.message);
@@ -145,4 +165,9 @@ export const run = async (service, command) => {
 export const wpCli = async (command) => {
 	command.unshift('wp');
 	return run('wp-cli', command);
+}
+
+export const wpCliTest = async (command) => {
+	command.unshift('wp');
+	return run('wp-test-cli', command);
 }

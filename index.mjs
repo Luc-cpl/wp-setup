@@ -30,6 +30,7 @@ program.command('stop')
 
 program.command('run')
   .description('Run a command in the development environment.')
+  .option('-w, --workdir <directory>', 'Can be a binded relative path from host or an absolute path in the container (default to service workdir).')
   .argument('<service>', 'The service to run the command on.')
   .argument('<command...>', 'The command to run in the service.')
   .allowUnknownOption()
@@ -40,5 +41,11 @@ program.command('wp')
   .argument('<command...>', 'The WP_CLI command to run.')
   .allowUnknownOption()
   .action(docker.wpCli);
+
+program.command('wp-test')
+  .description('Run a WP_CLI command in the test environment.')
+  .argument('<command...>', 'The WP_CLI command to run.')
+  .allowUnknownOption()
+  .action(docker.wpCliTest);
 
 program.parse();

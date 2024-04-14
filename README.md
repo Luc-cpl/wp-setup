@@ -29,7 +29,8 @@ Then you can add the following scripts to your `package.json` file:
 		"env:destroy": "wp-setup destroy",
 		"env:run": "wp-setup run",
 		"env:wp": "wp-setup wp",
-		"env:help": "wp-setup help"
+		"env:help": "wp-setup help",
+		"env:composer": "wp-setup run --workdir . wp-cli composer"
 	}
 }
 ```
@@ -49,15 +50,15 @@ Following you can see the available options, change them according to your needs
 	"include": "./docker-compose-override.yml",
 	"multisite": true,
 	"plugins": [
-		"${PWD}:my-plugin",
+		".:my-plugin",
 		"https://downloads.wordpress.org/plugin/query-monitor.zip:query-monitor"
 	],
 	"themes": [
-		"${PWD}:my-theme",
+		".:my-theme",
 		"https://downloads.wordpress.org/theme/twentytwenty.zip:twentytwenty"
 	],
 	"volumes": [
-		"${PWD}/uploads:/var/www/html/wp-content/uploads"
+		"./uploads:/var/www/html/wp-content/uploads"
 	]
 }
 ```
@@ -119,6 +120,23 @@ if you are using our suggested package.json scripts, you can run:
 npm run env:run <container> <command>
 ```
 
+Optionally, you can pass the `--workdir` (`-w`) flag to change the working directory of the command.
+
+The working directory can be a relative path from the current directory present in the `wp-setup.json` file (as plugins, themes os volumes) or a absolute path from container.
+
+This allow you to easily run composer commands, for example:
+
+```bash
+wp-setup run --workdir . wp-cli composer install
+```
+
+If you are using our suggested package.json scripts and the root directory is mounted, you can run:
+
+```bash
+npm run env:composer install
+```
+
+
 ### WP CLI
 
 To run a WP CLI command, you can run the following command:
@@ -155,8 +173,18 @@ npm run env:wp <command>
 - [x] - Stop Command
 - [x] - Run Command
 - [x] - WP CLI Command
-- [ ] - Composer Command
+- [x] - Composer Command
 - [x] - Prefix the project name to avoid naming collisions.
+
+## Code Reference
+
+If you find this project useful, please consider giving it a **Star** on GitHub!
+
+For more details, check out the project repository:
+
+- [GitHub Repository](https://github.com/Luc-cpl/wp-setup)
+
+Here, you'll find additional information about the project, including the source code, issues, pull requests, and more.
 
 ## License
 
