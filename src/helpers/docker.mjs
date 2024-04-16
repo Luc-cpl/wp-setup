@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import crypto from 'crypto';
 import { download, exists, extract, path, rm } from './fs.mjs';
 import { join } from 'path';
 
@@ -15,12 +14,10 @@ export const getComposeFiles = () => {
 	return files;
 }
 
-export const getProjectName = () => {
-	const hash = crypto.createHash('md5').update(process.cwd()).digest('hex').slice(0, 6);
-	return hash + '-' + process.cwd().split('/').pop().toLowerCase().replace(/[^a-z0-9]/gi, '-');
-}
-
 export const parseVolume = (value) => {
+	if (typeof value === 'object') {
+		return value;
+	}
 	value = value.split(':');
 	let [host, container] = value.length > 2
 		? [value.slice(0, -1).join(':'), value[value.length - 1]]
@@ -34,8 +31,8 @@ export const parseVolume = (value) => {
 }
 
 export const getExternalVolumeFiles = async (volumes, type) => {
-	const tmpDir = path(`build/tmp/${type}s`);
-	const destination = path(`build/${type}s`);
+	const tmpDir = path(`build/tmp/${type}`);
+	const destination = path(`build/${type}`);
 
 	const promises = volumes.map(async volume => {
 		if (!volume.host.startsWith('http')) {

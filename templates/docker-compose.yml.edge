@@ -20,13 +20,13 @@ services:
     restart: "unless-stopped"
     volumes:
       - "wp:/var/www/html:rw"
-      @each(bind in plugin)
+      @each(bind in plugins)
       - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
       @end
-      @each(bind in theme)
+      @each(bind in themes)
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
       @end
-      @each(bind in volume)
+      @each(bind in volumes)
       - "{{bind.host}}:${{bind.container}}:ro"
       @end
 
@@ -46,13 +46,13 @@ services:
     restart: "unless-stopped"
     volumes:
       - "wp-test:/var/www/html:rw"
-      @each(bind in plugin)
+      @each(bind in plugins)
       - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}:ro"
       @end
-      @each(bind in theme)
+      @each(bind in themes)
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
       @end
-      @each(bind in volume)
+      @each(bind in volumes)
       - "{{bind.host}}:${{bind.container}}:ro"
       @end
 
@@ -73,13 +73,13 @@ services:
     restart: "unless-stopped"
     volumes:
       - "wp:/var/www/html:rw"
-      @each(bind in plugin)
+      @each(bind in plugins)
       - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}"
       @end
-      @each(bind in theme)
+      @each(bind in themes)
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
-      @each(bind in volume)
+      @each(bind in volumes)
       - "{{bind.host}}:${{bind.container}}"
       @end
 
@@ -88,25 +88,33 @@ services:
       context: {{root}}docker/wordpress-cli
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
-    command: sleep infinity
+    command: >
+      sh -c "
+        composer global config --no-plugins allow-plugins.pestphp/pest-plugin true;
+        composer global require pestphp/pest yoast/phpunit-polyfills -W;
+        install-wp-tests && sleep infinity
+      "
     environment:
       VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
       WORDPRESS_DB_HOST: "database-test"
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      @if(multisite)
+      WP_TESTS_MULTISITE: {{multisite}}
+      @endif
     depends_on:
       - "wp-test"
-    restart: "unless-stopped"
+    {{--  restart: "unless-stopped"  --}}
     volumes:
       - "wp-test:/var/www/html:rw"
-      @each(bind in plugin)
+      @each(bind in plugins)
       - "{{bind.host}}:/var/www/html/wp-content/plugins/{{bind.container}}"
       @end
-      @each(bind in theme)
+      @each(bind in themes)
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
-      @each(bind in volume)
+      @each(bind in volumes)
       - "{{bind.host}}:${{bind.container}}"
       @end
 
