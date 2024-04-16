@@ -5,6 +5,8 @@
 - **Dockerized WordPress** - Run WordPress in a Docker container.
 - **FrankenPHP** - The Modern PHP App Server, written in Go.
 - **WP-CLI** - The command line interface for WordPress.
+- **PHPUnit 10** - The PHP testing framework.
+- **Pest 2** - The elegant PHP testing framework.
 
 ## Pre-requisites
 
@@ -24,13 +26,15 @@ Then you can add the following scripts to your `package.json` file:
 ```json
 {
 	"scripts": {
+		"wp-setup": "wp-setup",
 		"env:start": "wp-setup start",
 		"env:stop": "wp-setup stop",
 		"env:destroy": "wp-setup destroy",
 		"env:run": "wp-setup run",
 		"env:wp": "wp-setup wp",
 		"env:help": "wp-setup help",
-		"env:composer": "wp-setup run --workdir . wp-cli composer"
+		"env:composer": "wp-setup run --workdir . wp-cli composer",
+		"env:pest": "wp-setup run -w . wp-test-cli pest"
 	}
 }
 ```
@@ -39,29 +43,35 @@ Then you can add the following scripts to your `package.json` file:
 
 ## Usage
 
-### Add custom config file
+### Initiate the project configuration
 
-To easily load your configuration, you can create a `wp-setup.json` file in the root of your project.
-Following you can see the available options, change them according to your needs.
+To initiate the project configuration, you can run the following command:
 
-```json
-{
-	"host": "my-wordpress.localhost",
-	"include": "./docker-compose-override.yml",
-	"multisite": true,
-	"plugins": [
-		".:my-plugin",
-		"https://downloads.wordpress.org/plugin/query-monitor.zip:query-monitor"
-	],
-	"themes": [
-		".:my-theme",
-		"https://downloads.wordpress.org/theme/twentytwenty.zip:twentytwenty"
-	],
-	"volumes": [
-		"./uploads:/var/www/html/wp-content/uploads"
-	]
-}
+```bash
+wp-setup init
 ```
+
+if you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run wp-setup init
+```
+
+This will create a `wp-setup.json` file in the root of your project containing the necessary configurations to run the WordPress environment. Fell free to edit this file to fit your needs.
+
+**Available options:**
+
+- `include` - An docker-compose file to include in initialization with the default configuration.
+- `multisite` - Define if the WordPress environment will be a multisite. Supports "subdomain" and "subdirectory". If true is set, the value will be "subdirectory".
+- `host` - The host name to be used in the environment.
+- `plugins` - An array of plugins to be installed in the environment. Each item should be a string following the pattern './path-to-plugin:plugin-name'.
+- `themes` - An array of themes to be installed in the environment. Each item should be a string following the pattern './path-to-theme:theme-name'.
+- `volumes` - An array of volumes to be mounted in the environment. Each item should be a string following the pattern './path-to-volume:/path-in-container'.
+
+Also, **plugins, themes and volumes supports URL links to .zip files**, allowing easily download and install external plugins and themes.
+
+All plugins and themes will be activated at the environment start.
+
 
 ### Start
 
@@ -151,6 +161,38 @@ if you are using our suggested package.json scripts, you can run:
 npm run env:wp <command>
 ```
 
+## Test environment
+
+WP Setup comes with **Pest 2** and **PHPUnit 10** already configured to run with WordPress.
+
+You can easily setup your tests by running the following command:
+
+```bash
+wp-setup init --tests
+```
+
+If you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run wp-setup -- --tests
+```
+
+This will create a `tests` directory and a `phpunit.xml` file in the root of your project containing the necessary files to run tests with Pest.
+
+### Running tests with Pest
+
+To run the tests, you can run the following command **The environment must be running**:
+
+```bash
+wp-setup run -w . wp-test-cli pest
+```
+
+If you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run env:pest
+```
+
 ## Todo
 
 - [x] - Start Command
@@ -167,7 +209,7 @@ npm run env:wp <command>
 	- [ ] - Add xdebug support.
 	- [x] - download plugins and themes from links during start.
 - [x] - Configurations with JSON file.
-- [ ] - Test environment.
+- [x] - Test environment.
 - [ ] - Build environment.
 - [x] - Destroy Command
 - [x] - Stop Command
@@ -175,6 +217,9 @@ npm run env:wp <command>
 - [x] - WP CLI Command
 - [x] - Composer Command
 - [x] - Prefix the project name to avoid naming collisions.
+- [ ] - Allow custom WordPress version.
+- [ ] - Add test coverage for the project.
+- [ ] - Add Docker images to Docker Hub.
 
 ## Code Reference
 
@@ -188,4 +233,4 @@ Here, you'll find additional information about the project, including the source
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Luc-cpl/wp-setup/blob/main/README.md) file for details.

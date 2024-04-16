@@ -67,6 +67,6 @@ export const getJsonFile = (file) => {
 	try {
 		return JSON.parse(readFileSync(file, 'utf8'));
 	} catch (error) {
-		return false;
+		return null;
 	}
 }
