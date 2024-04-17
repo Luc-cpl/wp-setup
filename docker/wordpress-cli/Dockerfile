@@ -10,9 +10,11 @@ RUN addgroup www-data xfs
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 # Allow global packages from arbitrary docker users
-RUN mkdir /.composer && chmod -R 777 /.composer
-ENV PATH="${PATH}:/.composer/vendor/bin"
-ENV PATH="${PATH}:/home/www-data/.composer/vendor/bin"
+COPY composer/ /composer/
+RUN cd /composer && composer install
+RUN chmod -R 777 /composer
+ENV COMPOSER_HOME=/composer
+ENV PATH="${PATH}:/composer/vendor/bin"
 
 RUN mkdir /wordpress-tests-lib && chmod 777 /wordpress-tests-lib
 ENV WP_TESTS_DIR=/wordpress-tests-lib

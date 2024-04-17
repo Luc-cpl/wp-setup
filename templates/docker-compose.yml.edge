@@ -90,8 +90,6 @@ services:
     user: "${UID}:${GID}"
     command: >
       sh -c "
-        composer global config --no-plugins allow-plugins.pestphp/pest-plugin true;
-        composer global require pestphp/pest yoast/phpunit-polyfills -W;
         install-wp-tests && sleep infinity
       "
     environment:

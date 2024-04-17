@@ -35,10 +35,12 @@ export default class MakerCommands extends AbstractCommand {
 		}
 
 		const cwd = process.cwd();
+		const pluginName = cwd.split('/').pop();
+		const options = { projectName, pluginName };
 
 		const renderAndSaveTest = async (template) => {
 			this.__print(`Creating ${template} file...`);
-			return renderAndSave(`test-suit/${template}`, `${cwd}/${template}`, { projectName }, true);
+			return renderAndSave(`test-suit/${template}`, `${cwd}/${template}`, options, true);
 		}
 
 		await renderAndSaveTest('phpunit.xml');

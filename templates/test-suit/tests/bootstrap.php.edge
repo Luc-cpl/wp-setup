@@ -7,6 +7,12 @@
 
 use PHPUnit\Framework\Exception;
 
+$vendor_autoload = dirname(__DIR__) . '/vendor/autoload.php';
+
+if ( file_exists( $vendor_autoload ) ) {
+	require_once $vendor_autoload;
+}
+
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 if ( ! $_tests_dir ) {
@@ -31,7 +37,7 @@ require_once "{$_tests_dir}/includes/functions.php";
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require dirname( dirname( __FILE__ ) ) . '/plugin.php';
+	require dirname( dirname( __FILE__ ) ) . '/{{pluginName}}.php';
 }
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
@@ -50,3 +56,8 @@ class_alias( Exception::class, 'PHPUnit\Framework\TestListener' );
 
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
+
+// Load the TestCase class.
+if ( ! class_exists( Tests\TestCase::class ) && file_exists( __DIR__ . '/TestCase.php' ) ) {
+    require_once __DIR__ . '/TestCase.php';
+}

@@ -33,8 +33,8 @@ Then you can add the following scripts to your `package.json` file:
 		"env:run": "wp-setup run",
 		"env:wp": "wp-setup wp",
 		"env:help": "wp-setup help",
-		"env:composer": "wp-setup run --workdir . wp-cli composer",
-		"env:pest": "wp-setup run -w . wp-test-cli pest"
+		"env:composer": "wp-setup run wp-cli --workdir . composer",
+		"env:pest": "wp-setup run wp-test-cli --workdir . global-pest"
 	}
 }
 ```
@@ -137,7 +137,7 @@ The working directory can be a relative path from the current directory present 
 This allow you to easily run composer commands, for example:
 
 ```bash
-wp-setup run --workdir . wp-cli composer install
+wp-setup run wp-cli --workdir . composer install
 ```
 
 If you are using our suggested package.json scripts and the root directory is mounted, you can run:
@@ -181,16 +181,24 @@ This will create a `tests` directory and a `phpunit.xml` file in the root of you
 
 ### Running tests with Pest
 
-To run the tests, you can run the following command **The environment must be running**:
+WP Setup comes with a globally installed Pest CLI to run tests.
+
+To execute your tests you can run the following command **The environment must be running**:
 
 ```bash
-wp-setup run -w . wp-test-cli pest
+wp-setup run wp-test-cli -w . global-pest
 ```
 
 If you are using our suggested package.json scripts, you can run:
 
 ```bash
 npm run env:pest
+```
+
+Also, you can use your composer installed Pest CLI to run tests:
+
+```bash
+wp-setup run wp-test-cli -w . ./vendor/bin/pest
 ```
 
 ## Todo

@@ -1,0 +1,14 @@
+{
+    "name": "luccpl/global-pest",
+    "description": "Allow execute PestPHP as a global installed package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luc-cpl",
+            "email": "lucas.carvalhopl@outlook.com"
+        }
+    ],
+    "bin": [
+        "bin/global-pest"
+    ]
+}

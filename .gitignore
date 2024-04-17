@@ -1,2 +1,8 @@
 node_modules/
 build/
+cache/
+vendor/
+
+# Get last package versions
+docker/wordpress-cli/composer/composer.lock
+docker/wordpress-cli/composer/.htaccess

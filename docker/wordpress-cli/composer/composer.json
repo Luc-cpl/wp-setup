@@ -1,0 +1,18 @@
+{
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./packages/*"
+        }
+    ],
+    "require": {
+        "pestphp/pest": "^2.34",
+        "yoast/phpunit-polyfills": "^2.0",
+        "luccpl/global-pest": "dev-main"
+    }
+}
