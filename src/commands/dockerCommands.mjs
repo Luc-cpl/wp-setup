@@ -24,7 +24,7 @@ export default class DockerCommands extends AbstractCommand {
 		const files = await this.#parseComposeFiles(options);
 		save('docker-compose-files.json', JSON.stringify(files));
 
-		exec(`up -d --build --remove-orphans`, files, { stdio: 'inherit' });
+		this.exec(`up -d --build --remove-orphans`, files, { stdio: 'inherit' });
 
 		this.__print(`Project started. Configuring WordPress environments...`);
 
@@ -38,18 +38,31 @@ export default class DockerCommands extends AbstractCommand {
 
 	async destroy() {
 		await confirm('Are you sure you want to destroy the environment?');
-		exec('down -v');
+		this.exec('down -v', null, { stdio: 'inherit' });
 		this.__success('Environment destroyed.');
 	}
 	
 	async stop() {
-		exec('down');
-		deleteVolume('wp-test');
+		this.exec('down', null, { stdio: 'inherit' });
+		try {
+			this.deleteVolume('wp-test');
+		} catch (e) {}
 		this.__success('Environment stopped.');
+	}
+
+	exec(command, files = null, options = {}) {
+		if (options.stdio === undefined) {
+			options.stdio = this.mode === 'silent' ? 'pipe' : 'inherit';
+		}
+		return exec(command, files, options);
+	}
+
+	deleteVolume(volume) {
+		return deleteVolume(volume, { stdio: 'pipe' });
 	}
 	
 	async run(service, command, workdir) {
-		const services = exec('config --services', null, { stdio: 'pipe' }).toString().split('\n');
+		const services = this.exec('config --services', null, { stdio: 'pipe' }).toString().split('\n');
 		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 	
 		if (!services.includes(service)) {
@@ -72,7 +85,7 @@ export default class DockerCommands extends AbstractCommand {
 			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
 		}
 	
-		const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString())
+		const running = JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString())
 			.filter(service => service.State === 'running')
 			.map(service => service.Service);
 	
@@ -80,10 +93,10 @@ export default class DockerCommands extends AbstractCommand {
 	
 		try {
 			if (running.includes(service)) {
-				exec(`exec ${workdirCall} ${service} ${command.join(' ')}`);
+				this.exec(`exec ${workdirCall} ${service} ${command.join(' ')}`, null, { stdio: 'inherit' });
 				this.__success();
 			}
-			exec(`run --rm ${workdirCall} ${service} ${command.join(' ')}`);
+			this.exec(`run --rm ${workdirCall} ${service} ${command.join(' ')}`, null, { stdio: 'inherit' });
 			this.__success();
 		} catch (error) {
 			this.__error(error.message);
@@ -100,7 +113,7 @@ export default class DockerCommands extends AbstractCommand {
 		return run('wp-test-cli', command);
 	}
 
-	async #setupWP({cliContainer, host, multisite, plugin, theme}) {
+	async #setupWP({cliContainer, host, multisite, plugins, themes}) {
 		let installed = false;
 		let tryCount = 0;
 		while (!installed) {
@@ -112,7 +125,7 @@ export default class DockerCommands extends AbstractCommand {
 					'--admin_password=password',
 					'--admin_email=admin@email.com',
 				];
-				exec(`exec ${cliContainer} wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
+				this.exec(`exec ${cliContainer} wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
 				installed = true;
 			} catch (error) {
 				if (tryCount > 10) {
@@ -127,7 +140,7 @@ export default class DockerCommands extends AbstractCommand {
 			const type = multisite === true ? 'subdirectory' : multisite;
 			const subdomain = type === 'subdomain' ? '--subdomains' : '';
 			try {
-				exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
+				this.exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
 			} catch (e) {}
 		}
 	
@@ -135,19 +148,19 @@ export default class DockerCommands extends AbstractCommand {
 		const gid = process.env.GID ?? 33;
 	
 		// Get the current user and group of the wp-content directory
-		const output = exec(`exec ${cliContainer} ls -ld wp-content`, null, { stdio: 'pipe' }).toString().trim();
+		const output = this.exec(`exec ${cliContainer} ls -ld wp-content`, null, { stdio: 'pipe' }).toString().trim();
 		const parts = output.split(/\s+/);
 		const currentUser = parts[2];
 		const currentGroup = parts[3];
 	
 		// Ensure we can write to the wp-content directory
 		if (currentUser !== uid || currentGroup !== gid) {
-			exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`, null, { stdio: 'pipe' });
+			this.exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`);
 		}
 	
 		const tryExecAsync = async (command) => {
 			try {
-				exec(command, null, { stdio: 'pipe' });
+				this.exec(command);
 			} catch (e) {}
 		}
 	
@@ -159,8 +172,8 @@ export default class DockerCommands extends AbstractCommand {
 	
 		const getList = (array) => array.map(volume => volume.container).join(' ');
 	
-		const pluginsList = getList(plugin ?? [])
-		const themesList = getList(plugin ?? []);
+		const pluginsList = getList(plugins ?? [])
+		const themesList = getList(themes ?? []);
 		const multisiteFlag = multisite ? '--network' : '';
 	
 		const maybeExec = async (command, condition) => {
@@ -168,7 +181,7 @@ export default class DockerCommands extends AbstractCommand {
 				return;
 			}
 			try {
-				return exec(command, null, { stdio: 'pipe' });
+				return this.exec(command, null, { stdio: 'pipe' });
 			} catch (e) {
 				return e.message;
 			}

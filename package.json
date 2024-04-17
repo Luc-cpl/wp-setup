@@ -1,14 +1,12 @@
 {
   "name": "@luc-cpl/wp-setup",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A simple WordPress development environment",
   "repository": {
     "type": "git",
     "url": "https://github.com/Luc-cpl/wp-setup"
   },
-  "scripts": {
-
-  },
+  "scripts": {},
   "bin": {
     "wp-setup": "index.mjs"
   },

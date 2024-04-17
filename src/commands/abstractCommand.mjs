@@ -7,7 +7,7 @@ import { parseVolume } from '../helpers/docker.mjs';
  */
 export default class AbstractCommand {
 	#config = {};
-	#mode = 'silent';
+	mode = 'silent';
 
 	constructor(config) {
 		this.#setUser();
@@ -32,7 +32,7 @@ export default class AbstractCommand {
 	__getConfig = () => this.#config;
 
 	__print(message, type = 'info') {
-		if (this.#mode === 'silent' && type !== 'error' && type !== 'success') {
+		if (this.mode === 'silent' && type !== 'error' && type !== 'success') {
 			return;
 		}
 
