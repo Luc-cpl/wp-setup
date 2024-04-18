@@ -1,45 +1,44 @@
-import { exists } from "../helpers/fs.mjs";
-import { getProjectName } from '../helpers/cli.mjs';
-import { renderAndSave } from '../services/template.mjs';
-import AbstractCommand from './abstractCommand.mjs';
+import { exists } from "../helpers/fs";
+import { getProjectName } from '../helpers/cli';
+import { renderAndSave } from '../services/template';
+import AbstractCommand from './abstractCommand';
 
 export default class MakerCommands extends AbstractCommand {
-
-	init = async (createTests) => {
+	init = async (createTests: boolean) => {
 		const projectName = getProjectName(false);
 
 		if (!createTests) {
 			const setupFile = `${process.cwd()}/wp-setup.json`;
 			if (exists(setupFile)) {
-				this.__error('wp-setup.json already exists.');
+				this.error('wp-setup.json already exists.');
 			}
 
 			await renderAndSave('wp-setup.json', setupFile, { projectName }, true);
 
-			this.__success('Setup file created.', false);
-			this.__success('Please edit wp-setup.json to configure the project.', false);
-			this.__success('Run `wp-setup start` to start the project.', false);
-			this.__success();
+			this.success('Setup file created.', false);
+			this.success('Please edit wp-setup.json to configure the project.', false);
+			this.success('Run `wp-setup start` to start the project.', false);
+			this.success();
 		}
 
 		const phpUnitFile = `${process.cwd()}/phpunit.xml`;
 
 		if (exists(phpUnitFile)) {
-			this.__error('phpunit.xml already exists.');
+			this.error('phpunit.xml already exists.');
 		}
 
 		const testsDir = `${process.cwd()}/tests`;
 
 		if (exists(testsDir)) {
-			this.__error('tests directory already exists.');
+			this.error('tests directory already exists.');
 		}
 
 		const cwd = process.cwd();
 		const pluginName = cwd.split('/').pop();
 		const options = { projectName, pluginName };
 
-		const renderAndSaveTest = async (template) => {
-			this.__print(`Creating ${template} file...`);
+		const renderAndSaveTest = async (template: string) => {
+			this.print(`Creating ${template} file...`);
 			return renderAndSave(`test-suit/${template}`, `${cwd}/${template}`, options, true);
 		}
 
@@ -50,7 +49,6 @@ export default class MakerCommands extends AbstractCommand {
 		await renderAndSaveTest('tests/Feature/ExampleTest.php');
 		await renderAndSaveTest('tests/Unit/ExampleTest.php');
 
-		this.__success('Test files created.');
+		this.success('Test files created.');
 	}
-
 }

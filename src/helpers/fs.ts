@@ -1,10 +1,11 @@
 import { pipeline } from 'stream';
-import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync } from 'fs';
+import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync, WriteStream } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
 import unzipper from 'unzipper';
+import ConfigInterface from '../interfaces/configInterface';
 
 export const path = (path = '') => {
 	const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +13,7 @@ export const path = (path = '') => {
 	return join(__dirname, '../../', path);
 }
 
-export const download = async (url, dest) => {
+export const download = async (url: string, dest: string): Promise<WriteStream> => {
 	const folders = dest.split('/').slice(0, -1);
 	createDir(folders.join('/'));
 
@@ -37,22 +38,22 @@ export const download = async (url, dest) => {
 	});
 }
 
-export const exists = (path) => {
+export const exists = (path: string) => {
 	return existsSync(path);
 }
 
-export const extract = async (file, dest) => {
+export const extract = async (file: string, dest: string) => {
 	return createReadStream(file)
 		.pipe(unzipper.Extract({ path: dest }))
 		.on('entry', entry => entry.autodrain())
 		.promise();
 }
 
-export const rm = async (fileOrPath) => {
+export const rm = async (fileOrPath: string) => {
 	return nodeRm(fileOrPath, { recursive: true, force: true });
 }
 
-export const createDir = (path) => {
+export const createDir = (path: string) => {
 	const folders = path.split('/');
 	folders.reduce((acc, folder) => {
 		acc += folder + '/';
@@ -63,7 +64,7 @@ export const createDir = (path) => {
 	}, '');
 }
 
-export const getJsonFile = (file) => {
+export const getJsonFile = (file: string): ConfigInterface|null => {
 	try {
 		return JSON.parse(readFileSync(file, 'utf8'));
 	} catch (error) {

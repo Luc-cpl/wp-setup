@@ -1,8 +1,9 @@
 import { readFileSync } from 'fs';
-import { download, exists, extract, path, rm } from './fs.mjs';
+import { download, exists, extract, path, rm } from './fs';
 import { join } from 'path';
+import VolumeInterface from '../interfaces/volumeInterface';
 
-let files = [];
+let files = [] as string[];
 
 export const getComposeFiles = () => {
 	if (files.length) {
@@ -10,18 +11,19 @@ export const getComposeFiles = () => {
 	}
 
 	const jsonFile = path('build/docker-compose-files.json');
-	files = JSON.parse(readFileSync(jsonFile));
+	files = JSON.parse(readFileSync(jsonFile).toString());
 	return files;
 }
 
-export const parseVolume = (value) => {
-	if (typeof value === 'object') {
+export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
+	if (typeof value !== 'string') {
 		return value;
 	}
-	value = value.split(':');
-	let [host, container] = value.length > 2
-		? [value.slice(0, -1).join(':'), value[value.length - 1]]
-		: value;
+
+	const parts = value.split(':');
+	let [host, container] = parts.length > 2
+		? [parts.slice(0, -1).join(':'), parts[parts.length - 1]]
+		: parts;
 
 	if (host.startsWith('.') || (!host.startsWith('http') && host.match(/^[a-z0-9]/i))) {
 		host = join(process.cwd(), host);
@@ -30,17 +32,22 @@ export const parseVolume = (value) => {
  	return { host, container };
 }
 
-export const getExternalVolumeFiles = async (volumes, type) => {
+export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[], type: string): Promise<VolumeInterface[]> => {
 	const tmpDir = path(`build/tmp/${type}`);
 	const destination = path(`build/${type}`);
 
-	const promises = volumes.map(async volume => {
+	const promises = volumes.map(parseVolume).map(async volume => {
 		if (!volume.host.startsWith('http')) {
 			return volume;
 		}
 		
 		const url = volume.host;
 		const fileName = url.split('/').pop();
+
+		if (!fileName) {
+			throw new Error(`Invalid file URL: ${url}`);
+		}
+
 		const tmpFile = `${tmpDir}/${fileName}`;
 		const dirName = fileName.split('.').shift();
 		const dest = `${destination}/${dirName}`;
@@ -54,7 +61,7 @@ export const getExternalVolumeFiles = async (volumes, type) => {
 
 		const file = await download(url, tmpFile);
 
-		await extract(file.path, destination);
+		await extract(file.path.toString(), destination);
 		await rm(tmpFile);
 
 		return {

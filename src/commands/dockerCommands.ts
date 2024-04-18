@@ -1,76 +1,79 @@
-import AbstractCommand from './abstractCommand.mjs';
+import AbstractCommand from './abstractCommand';
 import { join } from 'path';
-import { confirm } from "../helpers/cli.mjs";
-import { getExternalVolumeFiles, parseVolume } from '../helpers/docker.mjs';
-import { getJsonFile } from '../helpers/fs.mjs';
-import { render, renderAndSave, save } from "../services/template.mjs";
-import { deleteVolume, exec } from "../services/docker.mjs";
+import { confirm } from "../helpers/cli";
+import { getExternalVolumeFiles, parseVolume } from '../helpers/docker';
+import { getJsonFile } from '../helpers/fs';
+import { render, renderAndSave, save } from "../services/template";
+import { deleteVolume, exec } from "../services/docker";
+import VolumeInterface from '../interfaces/volumeInterface';
+import ConfigInterface from '../interfaces/configInterface';
+
+interface DockerPsItem {
+	State: string;
+	Service: string;
+}
+
+interface DockerWPSetup {
+	cliContainer: string;
+	host: string;
+	multisite: boolean|string;
+	plugins: VolumeInterface[];
+	themes: VolumeInterface[];
+}
 
 export default class DockerCommands extends AbstractCommand {
-
-	async start({plugin = [], theme = [], volume = [], ...options}) {
+	public async start({plugin = [], theme = [], volume = [], ...options}) {
 		// Ensure the project is not already running
-		const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString());
+		const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[];
 		if (running.find(service => service.State === 'running')) {
-			this.__error('The project is already running.');
+			this.error('The project is already running.');
 		}
 
-		options = {...options, ...this.__getConfig()};
+		options = {...options, ...this.getConfig()}
 
 		options.plugins = [...options.plugins, ...plugin];
 		options.themes = [...options.themes, ...theme];
 		options.volumes = [...options.volumes, ...volume];
 
-		const files = await this.#parseComposeFiles(options);
+		const files = await this.parseComposeFiles(options as ConfigInterface);
 		save('docker-compose-files.json', JSON.stringify(files));
 
 		this.exec(`up -d --build --remove-orphans`, files, { stdio: 'inherit' });
 
-		this.__print(`Project started. Configuring WordPress environments...`);
+		this.print(`Project started. Configuring WordPress environments...`);
 
 		await Promise.all([
-			this.#setupWP({...options, cliContainer: 'wp-cli'}),
-			this.#setupWP({...options, host: `test.${options.host}`, cliContainer: 'wp-test-cli'}),
+			this.setupWP({...options, cliContainer: 'wp-cli'} as DockerWPSetup),
+			this.setupWP({...options, host: `test.${options.host}`, cliContainer: 'wp-test-cli'} as DockerWPSetup),
 		]);
 
-		this.__success(await render('views/docker/start-success', options));
+		this.success(await render('views/docker/start-success', options));
 	}
 
-	async destroy() {
+	public async destroy() {
 		await confirm('Are you sure you want to destroy the environment?');
 		this.exec('down -v', null, { stdio: 'inherit' });
-		this.__success('Environment destroyed.');
+		this.success('Environment destroyed.');
 	}
 	
-	async stop() {
+	public async stop() {
 		this.exec('down', null, { stdio: 'inherit' });
 		try {
-			this.deleteVolume('wp-test');
+			deleteVolume('wp-test', { stdio: 'pipe' });
 		} catch (e) {}
-		this.__success('Environment stopped.');
-	}
-
-	exec(command, files = null, options = {}) {
-		if (options.stdio === undefined) {
-			options.stdio = this.mode === 'silent' ? 'pipe' : 'inherit';
-		}
-		return exec(command, files, options);
-	}
-
-	deleteVolume(volume) {
-		return deleteVolume(volume, { stdio: 'pipe' });
+		this.success('Environment stopped.');
 	}
 	
-	async run(service, command, workdir) {
+	public async run(service: string, command: string[], workdir: string|false = false) {
 		const services = this.exec('config --services', null, { stdio: 'pipe' }).toString().split('\n');
 		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 	
 		if (!services.includes(service)) {
-			this.__error(`The service "${service}" does not exist.`);
+			this.error(`The service "${service}" does not exist.`);
 		}
 	
 		if (workdir && setupFile && !workdir.startsWith('/')) {
-			const setContainerPath = (volume, basePath = '') => ({
+			const setContainerPath = (volume: VolumeInterface, basePath = '') => ({
 				host: volume.host.includes('${PWD}') ? volume.host.replace('${PWD}', process.cwd()) : volume.host,
 				container: basePath + volume.container,
 			});
@@ -85,7 +88,7 @@ export default class DockerCommands extends AbstractCommand {
 			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
 		}
 	
-		const running = JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString())
+		const running = (JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[])
 			.filter(service => service.State === 'running')
 			.map(service => service.Service);
 	
@@ -94,26 +97,33 @@ export default class DockerCommands extends AbstractCommand {
 		try {
 			if (running.includes(service)) {
 				this.exec(`exec ${workdirCall} ${service} ${command.join(' ')}`, null, { stdio: 'inherit' });
-				this.__success();
+				this.success();
 			}
 			this.exec(`run --rm ${workdirCall} ${service} ${command.join(' ')}`, null, { stdio: 'inherit' });
-			this.__success();
-		} catch (error) {
-			this.__error(error.message);
+			this.success();
+		} catch (error: any) {
+			this.error(error.message);
 		}
 	}
 	
-	async wpCli(command) {
+	async wpCli(command: string[]) {
 		command.unshift('wp');
-		return run('wp-cli', command);
+		return this.run('wp-cli', command);
 	}
 	
-	async wpCliTest(command) {
+	async wpCliTest(command: string[]) {
 		command.unshift('wp');
-		return run('wp-test-cli', command);
+		return this.run('wp-test-cli', command);
 	}
 
-	async #setupWP({cliContainer, host, multisite, plugins, themes}) {
+	private exec(command: string, files: string[]|null = null, options = {} as any) {
+		if (options.stdio === undefined) {
+			options.stdio = this.mode === 'silent' ? 'pipe' : 'inherit';
+		}
+		return exec(command, files, options);
+	}
+
+	private async setupWP({cliContainer, host, multisite, plugins, themes}: DockerWPSetup) {
 		let installed = false;
 		let tryCount = 0;
 		while (!installed) {
@@ -129,7 +139,7 @@ export default class DockerCommands extends AbstractCommand {
 				installed = true;
 			} catch (error) {
 				if (tryCount > 10) {
-					this.__error('WordPress installation failed.');
+					this.error('WordPress installation failed.');
 				}
 				tryCount++;
 				await new Promise(resolve => setTimeout(resolve, 1000));
@@ -158,7 +168,7 @@ export default class DockerCommands extends AbstractCommand {
 			this.exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`);
 		}
 	
-		const tryExecAsync = async (command) => {
+		const tryExecAsync = async (command: string) => {
 			try {
 				this.exec(command);
 			} catch (e) {}
@@ -170,19 +180,19 @@ export default class DockerCommands extends AbstractCommand {
 			tryExecAsync(`exec ${cliContainer} wp theme delete twentytwentythree twentytwentytwo`),
 		]);
 	
-		const getList = (array) => array.map(volume => volume.container).join(' ');
+		const getList = (array: VolumeInterface[]) => array.map(volume => volume.container).join(' ');
 	
 		const pluginsList = getList(plugins ?? [])
 		const themesList = getList(themes ?? []);
 		const multisiteFlag = multisite ? '--network' : '';
 	
-		const maybeExec = async (command, condition) => {
+		const maybeExec = async (command: string, condition: boolean) => {
 			if (!condition) {
 				return;
 			}
 			try {
 				return this.exec(command, null, { stdio: 'pipe' });
-			} catch (e) {
+			} catch (e: any) {
 				return e.message;
 			}
 		}
@@ -193,9 +203,10 @@ export default class DockerCommands extends AbstractCommand {
 		]);
 	}
 
-	async #parseComposeFiles(config) {
+	private async parseComposeFiles(config: ConfigInterface): Promise<string[]> {
 		const volumes = await Promise.all(['plugins', 'themes', 'volumes'].map(async type =>{
-			return getExternalVolumeFiles(config[type] ?? [], type);
+			const volumes = (config[type as keyof ConfigInterface] ?? []) as string[]|VolumeInterface[];
+			return getExternalVolumeFiles(volumes, type);
 		}));
 
 		config.plugins = volumes[0];
@@ -211,5 +222,4 @@ export default class DockerCommands extends AbstractCommand {
 
 		return files;
 	}
-
 }
