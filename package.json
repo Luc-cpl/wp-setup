@@ -7,8 +7,21 @@
     "type": "git",
     "url": "https://github.com/Luc-cpl/wp-setup"
   },
+  "keywords": [
+    "cli",
+    "wordpress",
+    "setup",
+    "environment",
+    "docker",
+    "wordpress-cli",
+    "wp-cli",
+    "development"
+  ],
   "scripts": {
-    "build": "rm -rf ./dist && npx tsc && tsc-alias"
+    "build": "tsc && tsc-alias",
+    "build:fresh": "rm -rf ./dist && tsc && tsc-alias",
+    "prepublishOnly": "pnpm run build:fresh",
+    "watch": "nodemon"
   },
   "bin": {
     "wp-setup": "dist/index.js"
@@ -16,8 +29,7 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Lucas Carvalho",
   "license": "MIT",
   "dependencies": {
     "commander": "^12.0.0",
@@ -27,6 +39,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "@types/unzipper": "^0.10.9",
+    "nodemon": "^3.1.0",
     "tsc-alias": "^1.8.8",
     "typescript": "^5.4.5"
   }

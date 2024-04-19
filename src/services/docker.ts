@@ -18,7 +18,7 @@ export const exec = (command: string, files: string[]|null = null, options: Exec
 export const deleteVolume = (volume: string, options: ExecSyncOptions = { stdio: 'inherit' }) => {
 	const projectName = getProjectName();
 	const volumeName = `${projectName}_${volume}`;
-	
+
 	try {
 		return execSync(`docker volume rm ${volumeName}`, options);
 	} catch (error: any) {
