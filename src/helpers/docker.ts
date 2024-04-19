@@ -1,7 +1,8 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import VolumeInterface from '@/interfaces/volumeInterface';
 import { download, exists, extract, path, rm } from './fs';
-import { join } from 'path';
-import VolumeInterface from '../interfaces/volumeInterface';
 
 let files = [] as string[];
 

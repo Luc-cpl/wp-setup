@@ -1,11 +1,11 @@
 import { pipeline } from 'stream';
-import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync, WriteStream } from 'fs';
+import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync, WriteStream } from 'node:fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
 import unzipper from 'unzipper';
-import ConfigInterface from '../interfaces/configInterface';
+import ConfigInterface from '@/interfaces/configInterface';
 
 export const path = (path = '') => {
 	const __filename = fileURLToPath(import.meta.url);

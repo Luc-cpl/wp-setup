@@ -1,9 +1,8 @@
 import { execSync } from 'child_process';
 import { exit } from 'process';
 
-import ConfigInterface from '../interfaces/configInterface';
-
-import { parseVolume } from '../helpers/docker';
+import ConfigInterface from '@/interfaces/configInterface';
+import { parseVolume } from '@/helpers/docker';
 
 /**
  * @abstract

@@ -1,12 +1,12 @@
 import AbstractCommand from './abstractCommand';
-import { join } from 'path';
-import { confirm } from "../helpers/cli";
-import { getExternalVolumeFiles, parseVolume } from '../helpers/docker';
-import { getJsonFile } from '../helpers/fs';
-import { render, renderAndSave, save } from "../services/template";
-import { deleteVolume, exec } from "../services/docker";
-import VolumeInterface from '../interfaces/volumeInterface';
-import ConfigInterface from '../interfaces/configInterface';
+import { join } from 'node:path';
+import { confirm } from "@/helpers/cli";
+import { getExternalVolumeFiles, parseVolume } from '@/helpers/docker';
+import { getJsonFile } from '@/helpers/fs';
+import { render, renderAndSave, save } from "@/services/template";
+import { deleteVolume, exec } from "@/services/docker";
+import VolumeInterface from '@/interfaces/volumeInterface';
+import ConfigInterface from '@/interfaces/configInterface';
 
 interface DockerPsItem {
 	State: string;

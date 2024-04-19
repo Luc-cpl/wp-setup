@@ -1,6 +1,6 @@
-import { exists } from "../helpers/fs";
-import { getProjectName } from '../helpers/cli';
-import { renderAndSave } from '../services/template';
+import { exists } from "@/helpers/fs";
+import { getProjectName } from '@/helpers/cli';
+import { renderAndSave } from '@/services/template';
 import AbstractCommand from './abstractCommand';
 
 export default class MakerCommands extends AbstractCommand {

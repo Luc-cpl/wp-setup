@@ -1,7 +1,7 @@
 import { Edge } from 'edge.js'
 import { writeFileSync } from 'fs';
 
-import { createDir, path } from '../helpers/fs';
+import { createDir, path } from '@/helpers/fs';
 
 export const render = async (template: string, options: Record<string, any> = {}) => {
 	const edge = Edge.create();

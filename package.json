@@ -2,12 +2,13 @@
   "name": "@luc-cpl/wp-setup",
   "version": "1.0.6",
   "description": "The WordPress environment setup tool.",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/Luc-cpl/wp-setup"
   },
   "scripts": {
-    "build": "npx tsc"
+    "build": "rm -rf ./dist && npx tsc && tsc-alias"
   },
   "bin": {
     "wp-setup": "dist/index.js"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/node": "^20.12.7",
     "@types/unzipper": "^0.10.9",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.4.5"
   }
 }

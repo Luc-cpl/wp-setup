@@ -1,6 +1,6 @@
 import { ExecSyncOptions, execSync } from 'child_process';
-import { getComposeFiles } from '../helpers/docker';
-import { getProjectName } from '../helpers/cli';
+import { getComposeFiles } from '@/helpers/docker';
+import { getProjectName } from '@/helpers/cli';
 
 export const exec = (command: string, files: string[]|null = null, options: ExecSyncOptions = { stdio: 'inherit' }) => {
 	files = files ?? getComposeFiles();

@@ -7,6 +7,13 @@
         "module": "es2022",
         "sourceMap": true,
         "esModuleInterop": true,
-        "moduleResolution": "bundler"
+        "moduleResolution": "bundler",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+    },
+    "tsc-alias": {
+        "verbose": false,
+        "resolveFullPaths": true
     }
 }
