@@ -21,7 +21,8 @@
     "build": "tsc && tsc-alias",
     "build:fresh": "rm -rf ./dist && tsc && tsc-alias",
     "prepublishOnly": "pnpm run build:fresh",
-    "watch": "nodemon"
+    "watch": "nodemon",
+    "lint": "eslint src/"
   },
   "bin": {
     "wp-setup": "dist/index.js"
@@ -37,10 +38,14 @@
     "unzipper": "^0.10.14"
   },
   "devDependencies": {
+    "@eslint/js": "^9.1.1",
     "@types/node": "^20.12.7",
     "@types/unzipper": "^0.10.9",
+    "eslint": "^9.1.0",
+    "globals": "^15.0.0",
     "nodemon": "^3.1.0",
     "tsc-alias": "^1.8.8",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.7.0"
   }
 }

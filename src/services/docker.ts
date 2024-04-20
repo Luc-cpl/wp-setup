@@ -9,7 +9,8 @@ export const exec = (command: string, files: string[]|null = null, options: Exec
 
 	try {
 		return execSync(dockerCommand, options);
-	} catch (error: any) {
+	} catch (e) {
+		const error = e as Error;
 		error.message = error.message.replace(`Command failed: ${dockerCommand}`, '');
 		throw error;
 	}
@@ -21,7 +22,8 @@ export const deleteVolume = (volume: string, options: ExecSyncOptions = { stdio:
 
 	try {
 		return execSync(`docker volume rm ${volumeName}`, options);
-	} catch (error: any) {
+	} catch (e) {
+		const error = e as Error;
 		error.message = error.message.replace(`Command failed: docker volume rm ${volumeName}`, '');
 		throw error;
 	}

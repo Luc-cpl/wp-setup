@@ -1,4 +1,5 @@
 import AbstractCommand from './abstractCommand';
+import { ExecSyncOptions } from 'node:child_process';
 import { join } from 'node:path';
 import { confirm } from "@/helpers/cli";
 import { getExternalVolumeFiles, parseVolume } from '@/helpers/docker';
@@ -60,7 +61,7 @@ export default class DockerCommands extends AbstractCommand {
 		this.exec('down', null, { stdio: 'inherit' });
 		try {
 			deleteVolume('wp-test', { stdio: 'pipe' });
-		} catch (e) {}
+		} catch (e) {/* empty */}
 		this.success('Environment stopped.');
 	}
 	
@@ -101,8 +102,8 @@ export default class DockerCommands extends AbstractCommand {
 			}
 			this.exec(`run --rm ${workdirCall} ${service} ${command.join(' ')}`, null, { stdio: 'inherit' });
 			this.success();
-		} catch (error: any) {
-			this.error(error.message);
+		} catch (error: unknown) {
+			this.error((error as Error).message);
 		}
 	}
 	
@@ -116,7 +117,7 @@ export default class DockerCommands extends AbstractCommand {
 		return this.run('wp-test-cli', command);
 	}
 
-	private exec(command: string, files: string[]|null = null, options = {} as any) {
+	private exec(command: string, files: string[]|null = null, options = {} as ExecSyncOptions) {
 		if (options.stdio === undefined) {
 			options.stdio = this.mode === 'silent' ? 'pipe' : 'inherit';
 		}
@@ -151,7 +152,7 @@ export default class DockerCommands extends AbstractCommand {
 			const subdomain = type === 'subdomain' ? '--subdomains' : '';
 			try {
 				this.exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
-			} catch (e) {}
+			} catch (e) {/* empty */}
 		}
 	
 		const uid = process.env.UID ?? 33;
@@ -171,7 +172,7 @@ export default class DockerCommands extends AbstractCommand {
 		const tryExecAsync = async (command: string) => {
 			try {
 				this.exec(command);
-			} catch (e) {}
+			} catch (e) {/* empty */}
 		}
 	
 		await Promise.all([
@@ -192,8 +193,8 @@ export default class DockerCommands extends AbstractCommand {
 			}
 			try {
 				return this.exec(command, null, { stdio: 'pipe' });
-			} catch (e: any) {
-				return e.message;
+			} catch (error) {
+				return (error as Error).message;
 			}
 		}
 	

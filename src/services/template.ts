@@ -3,14 +3,14 @@ import { writeFileSync } from 'fs';
 
 import { createDir, path } from '@/helpers/fs';
 
-export const render = async (template: string, options: Record<string, any> = {}) => {
+export const render = async (template: string, options: Record<string, unknown> = {}) => {
 	const edge = Edge.create();
 	edge.mount(path('templates'));
 	options.root = path();
 	return edge.render(template, options);
 }
 
-export const renderAndSave = async (template: string, file: string, options: Record<string, any> = {}, project = false) => {
+export const renderAndSave = async (template: string, file: string, options: Record<string, unknown> = {}, project = false) => {
 	const content = await render(template, options);
 	return await save(file, content, project);
 }

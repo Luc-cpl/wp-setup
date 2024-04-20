@@ -22,15 +22,17 @@ export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
 	}
 
 	const parts = value.split(':');
-	let [host, container] = parts.length > 2
+	const [host, container] = parts.length > 2
 		? [parts.slice(0, -1).join(':'), parts[parts.length - 1]]
 		: parts;
+	
+	const response = { host, container } as VolumeInterface;
 
 	if (host.startsWith('.') || (!host.startsWith('http') && host.match(/^[a-z0-9]/i))) {
-		host = join(process.cwd(), host);
+		response.host = join(process.cwd(), host);
 	}
 
- 	return { host, container };
+ 	return response;
 }
 
 export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[], type: string): Promise<VolumeInterface[]> => {

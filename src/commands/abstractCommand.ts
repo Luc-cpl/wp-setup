@@ -9,7 +9,7 @@ import { parseVolume } from '@/helpers/docker';
  */
 export default abstract class AbstractCommand {
 	private config = {} as ConfigInterface;
-	protected mode = 'silent';
+	protected mode = 'silent' as 'silent'|'verbose';
 
 	constructor(config: ConfigInterface) {
 		this.setUser();
@@ -33,13 +33,25 @@ export default abstract class AbstractCommand {
 
 	protected getConfig = () => this.config;
 
-	protected print(message: string, type = 'info') {
+	protected print(message: string, type: 'error'|'warn'|'success'|'info' = 'info') {
 		if (this.mode === 'silent' && type !== 'error' && type !== 'success') {
 			return;
 		}
 
-		const call = type in console ? console[type as keyof Console] as Function : console.log;
-		call(message);
+		if (this.mode === 'verbose') {
+			message = `[${type.toUpperCase()}] ${message}`;
+		}
+
+		switch (type) {
+			case 'error':
+				return console.error(message);
+			case 'warn':
+				return console.warn(message);
+			case 'info':
+				return console.info(message);
+			default:
+				return console.log(message);
+		}
 	}
 
 	protected error(message: string, shouldExit = true) {
