@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+        "target": "es6",
+        "module": "es2022",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "moduleResolution": "bundler",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+    },
+    "tsc-alias": {
+        "verbose": false,
+        "resolveFullPaths": true
+    }
+}

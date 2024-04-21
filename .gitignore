@@ -2,6 +2,7 @@ node_modules/
 build/
 cache/
 vendor/
+dist/
 
 # Get last package versions
 docker/wordpress-cli/composer/composer.lock

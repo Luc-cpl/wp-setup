@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { parseVolume } from './src/helpers/docker.mjs';
 
-import { getJsonFile } from './src/helpers/fs.mjs';
-import DockerCommands from './src/commands/dockerCommands.mjs';
-import MakerCommands from './src/commands/makerCommands.mjs';
+import { VolumeInterface } from '@/interfaces/docker';
+import { ConfigInterface } from '@/interfaces/setup';
 
-const parseVolumes = (value, previous) => {
+import { parseVolume } from './helpers/docker';
+import { getJsonFile } from './helpers/fs';
+
+import DockerCommands from './commands/dockerCommands';
+import MakerCommands from './commands/makerCommands';
+
+const parseVolumes = (value: string, previous: VolumeInterface[]) => {
 	return [...previous ?? [], parseVolume(value)];
 }
 
-const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`) ?? {};
+const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`) ?? {} as ConfigInterface;
 
 const docker = new DockerCommands(setupFile);
 const maker = new MakerCommands(setupFile);
