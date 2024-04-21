@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
 import unzipper from 'unzipper';
-import ConfigInterface from '@/interfaces/configInterface';
+import { ConfigInterface } from '@/interfaces/setup';
 
 export const path = (path = '') => {
 	const __filename = fileURLToPath(import.meta.url);

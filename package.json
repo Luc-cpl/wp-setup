@@ -20,7 +20,7 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "build:fresh": "rm -rf ./dist && tsc && tsc-alias",
-    "prepublishOnly": "pnpm run build:fresh",
+    "prepublishOnly": "pnpm lint && pnpm run build:fresh",
     "watch": "nodemon",
     "lint": "eslint src/"
   },

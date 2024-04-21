@@ -2,14 +2,14 @@
 
 import { program } from 'commander';
 
-import VolumeInterface from './interfaces/volumeInterface';
+import { VolumeInterface } from '@/interfaces/docker';
+import { ConfigInterface } from '@/interfaces/setup';
 
 import { parseVolume } from './helpers/docker';
 import { getJsonFile } from './helpers/fs';
 
 import DockerCommands from './commands/dockerCommands';
 import MakerCommands from './commands/makerCommands';
-import ConfigInterface from './interfaces/configInterface';
 
 const parseVolumes = (value: string, previous: VolumeInterface[]) => {
 	return [...previous ?? [], parseVolume(value)];

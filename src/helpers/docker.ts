@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import VolumeInterface from '@/interfaces/volumeInterface';
+import { VolumeInterface } from '@/interfaces/docker';
 import { download, exists, extract, path, rm } from './fs';
 
 let files = [] as string[];

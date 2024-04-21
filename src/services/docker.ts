@@ -2,7 +2,11 @@ import { ExecSyncOptions, execSync } from 'child_process';
 import { getComposeFiles } from '@/helpers/docker';
 import { getProjectName } from '@/helpers/cli';
 
-export const exec = (command: string, files: string[]|null = null, options: ExecSyncOptions = { stdio: 'inherit' }) => {
+import { ComposeExecInterface } from '@/interfaces/docker';
+import { ConfigInterface } from '@/interfaces/setup';
+import { renderAndSave, save } from './template';
+
+export const exec: ComposeExecInterface = (command, files = null, options = { stdio: 'inherit' }) => {
 	files = files ?? getComposeFiles();
 	const projectName = getProjectName();
 	const dockerCommand = `docker compose -p ${projectName} ${files.map(f => `-f ${f}`).join(' ')} ${command}`;
@@ -27,4 +31,17 @@ export const deleteVolume = (volume: string, options: ExecSyncOptions = { stdio:
 		error.message = error.message.replace(`Command failed: docker volume rm ${volumeName}`, '');
 		throw error;
 	}
+}
+
+export const parseComposeFiles = async (config: ConfigInterface): Promise<string[]> => {
+	const file = await renderAndSave('docker-compose.yml', 'docker-compose.yml', config);
+	const files = [file];
+
+	if (config.include) {
+		files.push(config.include);
+	}
+
+	save('docker-compose-files.json', JSON.stringify(files));
+
+	return files;
 }

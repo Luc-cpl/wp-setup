@@ -4,7 +4,7 @@ import { renderAndSave } from '@/services/template';
 import AbstractCommand from './abstractCommand';
 
 export default class MakerCommands extends AbstractCommand {
-	init = async (createTests: boolean) => {
+	public init = async (createTests: boolean) => {
 		const projectName = getProjectName(false);
 
 		if (!createTests) {
