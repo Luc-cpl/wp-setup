@@ -27,13 +27,7 @@ program.command('init')
 
 program.command('start')
   .description('Start the development environment.')
-  .option('-i, --include <file>', 'A custom docker-compose file to include.', '')
-  .option('-p, --plugin <directory:name...>', 'Plugins to include in the development environment.', parseVolumes)
-  .option('-t, --theme <directory:name...>', 'Themes to include in the development environment.', parseVolumes)
-  .option('-v, --volume <host:container...>', 'Additional volumes to include in the development environment.', parseVolumes)
-  .option('--host <host>', 'The host to expose the development environment on.', 'localhost')
   .option('--xdebug', 'Enable XDebug for the development environment.', false)
-  .option('--multisite [type]', 'Enable multisite for the development environment (subdomain or subdirectory, defaults to subdirectory).', false)
   .action(options => docker.start(options));
 
 program.command('destroy')
@@ -42,7 +36,8 @@ program.command('destroy')
 
 program.command('stop')
   .description('Stop the development environment.')
-  .action(() => docker.stop());
+  .option('--xdebug', 'Only stop XDebug for the development environment.', false)
+  .action(options => docker.stop(options));
 
 program.command('run')
   .description('Run a command in the development environment.')

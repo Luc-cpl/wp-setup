@@ -7,6 +7,7 @@
 - **WP-CLI** - The command line interface for WordPress.
 - **PHPUnit 10** - The PHP testing framework.
 - **Pest 2** - The elegant PHP testing framework.
+- **Xdebug** - The PHP debugger.
 
 ## Pre-requisites
 
@@ -28,13 +29,16 @@ Then you can add the following scripts to your `package.json` file:
 	"scripts": {
 		"wp-setup": "wp-setup",
 		"env:start": "wp-setup start",
+		"env:start:xdebug": "wp-setup start --xdebug",
 		"env:stop": "wp-setup stop",
+		"env:stop:xdebug": "wp-setup stop --xdebug",
 		"env:destroy": "wp-setup destroy",
 		"env:run": "wp-setup run",
 		"env:wp": "wp-setup wp",
 		"env:help": "wp-setup help",
 		"env:composer": "wp-setup run wp-cli --workdir . composer",
-		"env:pest": "wp-setup run wp-test-cli --workdir . global-pest"
+		"env:pest": "wp-setup run wp-test-cli --workdir . global-pest",
+		"env:pest:coverage": "wp-setup run -w . wp-test-cli global-pest --coverage-html ./tests/coverage"
 	}
 }
 ```
@@ -87,6 +91,41 @@ if you are using our suggested package.json scripts, you can run:
 npm run env:start
 ```
 
+If you want to start the environment with xdebug support, you can run:
+
+```bash
+wp-setup start --xdebug
+```
+
+if you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run env:start:xdebug
+```
+
+This will start the WordPress environment with xdebug support for debugging in all PHP related containers (WP, WP-CLI and tests).
+
+You can easily integrate your IDE with xdebug by mapping your project directories to the container directories.
+
+For use with **VSCode**, you can add the following configuration to your `.vscode/launch.json` file (replace the pathMappings with your project directories accordingly):
+
+```json
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Listen for XDebug",
+			"type": "php",
+			"request": "launch",
+			"port": 9003,
+			"pathMappings": {
+				"/var/www/html/wp-content/plugins/my-plugin": "${workspaceFolder}/plugins/my-plugin",
+			}
+		}
+	]
+}
+```
+
 ### Stop
 
 To stop your WordPress environment, you can run the following command:
@@ -98,8 +137,19 @@ wp-setup stop
 if you are using our suggested package.json scripts, you can run:
 
 ```bash
-
 npm run env:stop
+```
+
+If you want to only stop xdebug, you can run:
+
+```bash
+wp-setup stop --xdebug
+```
+
+if you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run env:stop:xdebug
 ```
 
 ### Destroy
@@ -201,11 +251,37 @@ Also, you can use your composer installed Pest CLI to run tests:
 wp-setup run wp-test-cli -w . ./vendor/bin/pest
 ```
 
+### Generating coverage report
+
+The test environment comes with xdebug support, allowing you to generate coverage reports by default.
+
+To generate a coverage report in HTML format, you can run the following command **The environment must be running**:
+
+```bash
+wp-setup run -w . wp-test-cli global-pest --coverage-html ./tests/coverage
+```
+
+If you are using our suggested package.json scripts, you can run:
+
+```bash
+npm run env:pest:coverage
+```
+
+This will generate a `tests/coverage` directory with the coverage report with the HTML output.
+
+You can also use the default CLI coverage, but in this case you current need to require Pest locally in your project:
+
+```bash
+wp-setup run -w . wp-cli composer require pestphp/pest yoast/phpunit-polyfills --dev
+```
+
+Then you can change the `global-pest` calls to `./vendor/bin/pest` in the commands above.
+
 ## Todo
 
 - [x] - Start Command
 	- [x] - Create a docker-compose file based on template.
-	- [x] - Bind flagged plugins, themes and volumes directories.
+	- [x] - Bind flagged plugins, themes and volumes in configuration.
 	- [x] - Start the docker-compose file.
 	- [x] - Allow adding custom docker-compose file.
 	- [x] - Ensure same configuration on commands.
@@ -214,7 +290,7 @@ wp-setup run wp-test-cli -w . ./vendor/bin/pest
 	- [x] - Add custom host name.
 	- [ ] - Edit /etc/hosts file to add custom host name.
 	- [x] - Add multisite support.
-	- [ ] - Add xdebug support.
+	- [x] - Add xdebug support.
 	- [x] - download plugins and themes from links during start.
 - [x] - Configurations with JSON file.
 - [x] - Test environment.

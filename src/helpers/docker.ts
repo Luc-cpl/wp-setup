@@ -12,7 +12,17 @@ export const getComposeFiles = () => {
 	}
 
 	const jsonFile = path('build/docker-compose-files.json');
-	files = JSON.parse(readFileSync(jsonFile).toString());
+
+	if (!exists(jsonFile)) {
+		return [];
+	}
+
+	try {
+		files = JSON.parse(readFileSync(jsonFile).toString());
+	} catch (e) {
+		rm(jsonFile);
+		files = [];
+	}
 	return files;
 }
 

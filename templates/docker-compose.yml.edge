@@ -6,12 +6,15 @@ services:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SERVER_NAME: "{{host}}"
       WORDPRESS_DB_HOST: "database"
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
     depends_on:
       - "database"
     ports:
@@ -35,12 +38,15 @@ services:
       context: {{root}}docker/wordpress
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       SERVER_NAME: "test.{{host}}"
       WORDPRESS_DB_HOST: "database-test"
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
     depends_on:
       - "database-test"
     restart: "unless-stopped"
@@ -61,6 +67,8 @@ services:
       context: {{root}}docker/wordpress-cli
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: sleep infinity
     environment:
       VIRTUAL_HOST: "${DOCKER_DEV_DOMAIN:-project.test}"
@@ -68,6 +76,7 @@ services:
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      XDEBUG_MODE: "${TEST_XDEBUG_MODE:-coverage}"
     depends_on:
       - "wp"
     restart: "unless-stopped"
@@ -88,6 +97,8 @@ services:
       context: {{root}}docker/wordpress-cli
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: >
       sh -c "
         install-wp-tests && sleep infinity
@@ -98,6 +109,7 @@ services:
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      XDEBUG_MODE: "${TEST_XDEBUG_MODE:-coverage}"
       @if(multisite)
       WP_TESTS_MULTISITE: {{multisite}}
       @endif

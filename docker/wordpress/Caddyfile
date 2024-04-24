@@ -27,7 +27,7 @@ test.{$SERVER_NAME:test.localhost}, *.test.{$SERVER_NAME:test.localhost} {
 	encode zstd br gzip
 
 	# Multisite subdirectory (subdomains mode works by default)
-	uri path_regexp (\/{1})(\w|\d|\s)+\/wp- /wp-
+	uri path_regexp (\/{1})(\w|\d|\s)+\/wp-(content|includes|admin) /wp-$3
 
 	{$CADDY_SERVER_EXTRA_DIRECTIVES}
 

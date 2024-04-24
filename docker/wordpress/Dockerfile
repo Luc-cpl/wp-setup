@@ -9,7 +9,13 @@ RUN install-php-extensions \
     mysqli \
     zip \
     imagick \
-    opcache
+    opcache \
+    xdebug
+
+# configure xdebug
+RUN echo "xdebug.mode=${XDEBUG_MODE:-off}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 COPY --from=wordpress /usr/local/etc/php/conf.d/* /usr/local/etc/php/conf.d/
 COPY --from=wordpress /usr/local/bin/docker-entrypoint.sh /usr/local/bin/

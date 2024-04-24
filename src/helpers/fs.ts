@@ -4,8 +4,8 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
-import unzipper from 'unzipper';
 import { ConfigInterface } from '@/interfaces/setup';
+import AdmZip from 'adm-zip';
 
 export const path = (path = '') => {
 	const __filename = fileURLToPath(import.meta.url);
@@ -42,11 +42,9 @@ export const exists = (path: string) => {
 	return existsSync(path);
 }
 
-export const extract = async (file: string, dest: string) => {
-	return createReadStream(file)
-		.pipe(unzipper.Extract({ path: dest }))
-		.on('entry', entry => entry.autodrain())
-		.promise();
+export const extract = async (file: string, dest: string): Promise<void> => {
+	const zip = new AdmZip(file);
+	zip.extractAllTo(dest);
 }
 
 export const rm = async (fileOrPath: string) => {

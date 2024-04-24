@@ -1,6 +1,6 @@
 {
   "name": "@luc-cpl/wp-setup",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "The WordPress environment setup tool.",
   "type": "module",
   "repository": {
@@ -33,14 +33,14 @@
   "author": "Lucas Carvalho",
   "license": "MIT",
   "dependencies": {
+    "adm-zip": "^0.5.12",
     "commander": "^12.0.0",
-    "edge.js": "^6.0.2",
-    "unzipper": "^0.10.14"
+    "edge.js": "^6.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.1.1",
+    "@types/adm-zip": "^0.5.5",
     "@types/node": "^20.12.7",
-    "@types/unzipper": "^0.10.9",
     "eslint": "^9.1.0",
     "globals": "^15.0.0",
     "nodemon": "^3.1.0",

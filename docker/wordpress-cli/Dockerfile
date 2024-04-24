@@ -4,7 +4,16 @@ ARG USER=www-data
 
 USER root
 
+RUN apk --no-cache add pcre-dev linux-headers ${PHPIZE_DEPS}
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+RUN apk del pcre-dev ${PHPIZE_DEPS}
+
 RUN apk add subversion
+
+# configure xdebug
+RUN echo "xdebug.mode=${XDEBUG_MODE:-off}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 RUN addgroup www-data xfs
 

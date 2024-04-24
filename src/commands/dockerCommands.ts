@@ -16,42 +16,44 @@ interface DockerPsItem {
 	Service: string;
 }
 
-interface StartCommandOptions extends ConfigInterface {
-	plugin?: string[]|VolumeInterface[];
-	theme?: string[]|VolumeInterface[];
-	volume?: string[]|VolumeInterface[];
-}
-
 export default class DockerCommands extends AbstractCommand {
-	public async start({plugin = [], theme = [], volume = [], ...options}: StartCommandOptions) {
+	public async start({ xdebug } : { xdebug?: boolean }) {
 		// Ensure the project is not already running
 		const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[];
 		if (running.find(service => service.State === 'running')) {
+			if (xdebug) {
+				process.env.XDEBUG_MODE = 'debug,develop'
+				process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
+				this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
+				this.success('XDebug started.');
+			}
 			this.error('The project is already running.');
 		}
 
-		options = {...options, ...this.getConfig()};
-		options.plugins.concat(plugin);
-		options.themes.concat(theme);
-		options.volumes.concat(volume);
+		if  (xdebug) {
+			process.env.XDEBUG_MODE = 'debug,develop'
+			process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
+		}
+
+		const config = this.getConfig();
 
 		const [plugins, themes, volumes] = await Promise.all(['plugins', 'themes', 'volumes'].map(async type =>{
-			const volumes = (options[type] ?? []) as string[]|VolumeInterface[];
+			const volumes = (config[type] ?? []) as string[]|VolumeInterface[];
 			return getExternalVolumeFiles(volumes, type);
 		}));
 
-		options.plugins = plugins;
-		options.themes = themes;
-		options.volumes = volumes;
+		config.plugins = plugins;
+		config.themes = themes;
+		config.volumes = volumes;
 
-		const files = await parseComposeFiles(options);
+		const files = await parseComposeFiles(config);
 
 		this.exec('up -d --build --remove-orphans', files, { stdio: 'inherit' });
 
 		this.success('Project started. Configuring WordPress environments...', false);
 
 		const setupData = {
-			...options,
+			...config,
 			cliContainer: 'wp-cli',
 			exec: this.exec,
 		} as SetupInterface;
@@ -59,13 +61,13 @@ export default class DockerCommands extends AbstractCommand {
 		try {
 			await Promise.all([
 				runSetup(setupData),
-				runSetup({...setupData, host: `test.${options.host}`, cliContainer: 'wp-test-cli'}),
+				runSetup({...setupData, host: `test.${config.host}`, cliContainer: 'wp-test-cli'}),
 			]);
 		} catch (error: unknown) {
 			this.error((error as Error).message);
 		}
 
-		this.success(await render('views/docker/start-success', options));
+		this.success(await render('views/docker/start-success', config));
 	}
 
 	public async destroy() {
@@ -74,7 +76,14 @@ export default class DockerCommands extends AbstractCommand {
 		this.success('Environment destroyed.');
 	}
 
-	public async stop() {
+	public async stop({ xdebug } : { xdebug?: boolean }) {
+		if (xdebug) {
+			process.env.XDEBUG_MODE = 'off';
+			process.env.TEST_XDEBUG_MODE = 'coverage';
+			this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
+			this.success('XDebug stopped.');
+		}
+
 		this.exec('down', null, { stdio: 'inherit' });
 		try {
 			deleteVolume('wp-test', { stdio: 'pipe' });
