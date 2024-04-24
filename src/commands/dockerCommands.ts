@@ -2,7 +2,6 @@ import AbstractCommand from './abstractCommand';
 import { ExecSyncOptions } from 'node:child_process';
 import { join } from 'node:path';
 import { VolumeInterface } from '@/interfaces/docker';
-import { ConfigInterface } from '@/interfaces/setup';
 import { SetupInterface } from '@/interfaces/wordpress';
 import { getExternalVolumeFiles, parseVolume } from '@/helpers/docker';
 import { getJsonFile } from '@/helpers/fs';

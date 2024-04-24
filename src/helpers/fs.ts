@@ -1,5 +1,5 @@
 import { pipeline } from 'stream';
-import { createWriteStream, createReadStream, mkdirSync, existsSync, readFileSync, WriteStream } from 'node:fs';
+import { createWriteStream, mkdirSync, existsSync, readFileSync, WriteStream } from 'node:fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { get } from 'https';
