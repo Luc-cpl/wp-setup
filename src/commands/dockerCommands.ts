@@ -6,31 +6,22 @@ import { SetupInterface } from '@/interfaces/wordpress';
 import { getExternalVolumeFiles, parseVolume } from '@/helpers/docker';
 import { getJsonFile } from '@/helpers/fs';
 import { confirm } from "@/helpers/cli";
-import { deleteVolume, exec, parseComposeFiles } from "@/services/docker";
+import { deleteVolume, exec, getServices, parseComposeFiles } from "@/services/docker";
 import { render } from "@/services/template";
 import { runSetup } from '@/services/wordpress';
-
-interface DockerPsItem {
-	State: string;
-	Service: string;
-}
 
 export default class DockerCommands extends AbstractCommand {
 	public async start({ xdebug } : { xdebug?: boolean }) {
 		// Ensure the project is not already running
-		try {
-			const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[];
-			if (running.find(service => service.State === 'running')) {
-				if (xdebug) {
-					process.env.XDEBUG_MODE = 'debug,develop'
-					process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
-					this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
-					this.success('XDebug started.');
-				}
-				this.error('The project is already running.');
+		const running = getServices();
+		if (running.find(service => service.State === 'running')) {
+			if (xdebug) {
+				process.env.XDEBUG_MODE = 'debug,develop'
+				process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
+				this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
+				this.success('XDebug started.');
 			}
-		} catch (error: unknown) {
-			// Continue (no running services)
+			this.error('The project is already running.');
 		}
 
 		if  (xdebug) {
@@ -118,15 +109,9 @@ export default class DockerCommands extends AbstractCommand {
 			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
 		}
 
-		let running = [] as string[];
-
-		try {
-			running = (JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[])
-				.filter(service => service.State === 'running')
-				.map(service => service.Service);
-		} catch (error: unknown) {
-			// Continue (no running services)
-		}
+		const running = getServices()
+			.filter(service => service.State === 'running')
+			.map(service => service.Service);
 
 		const workdirCall = workdir ? `--workdir="${workdir}"` : '';
 

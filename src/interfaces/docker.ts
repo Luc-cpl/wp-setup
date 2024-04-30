@@ -8,3 +8,8 @@ export interface VolumeInterface {
 export interface ComposeExecInterface {
 	(command: string, files?: string[] | null, options?: ExecSyncOptions): string | Buffer;
 }
+
+export interface DockerPsItem {
+	State: string;
+	Service: string;
+}

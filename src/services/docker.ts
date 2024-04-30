@@ -2,7 +2,7 @@ import { ExecSyncOptions, execSync } from 'child_process';
 import { getComposeFiles } from '@/helpers/docker';
 import { getProjectName } from '@/helpers/cli';
 
-import { ComposeExecInterface } from '@/interfaces/docker';
+import { ComposeExecInterface, DockerPsItem } from '@/interfaces/docker';
 import { ConfigInterface } from '@/interfaces/setup';
 import { renderAndSave, save } from './template';
 
@@ -44,4 +44,19 @@ export const parseComposeFiles = async (config: ConfigInterface): Promise<string
 	save('docker-compose-files.json', JSON.stringify(files));
 
 	return files;
+}
+
+export const getServices = () => {
+	try {
+		let jsonStr = exec('ps --format json', null, { stdio: 'pipe' }).toString();
+		/**
+		 * In older versions of Docker, the output will be correctly formatted as JSON,
+		 * since docker compose 2.21, the output an invalid JSON string.
+		 */
+		jsonStr = jsonStr.replace(/}\s*{/g, '},{');
+		jsonStr = jsonStr.startsWith('[') ? jsonStr : `[${jsonStr}]`;
+		return JSON.parse(jsonStr) as DockerPsItem[];
+	} catch (error: unknown) {
+		return [];
+	}
 }
