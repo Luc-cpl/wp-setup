@@ -18,15 +18,19 @@ interface DockerPsItem {
 export default class DockerCommands extends AbstractCommand {
 	public async start({ xdebug } : { xdebug?: boolean }) {
 		// Ensure the project is not already running
-		const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[];
-		if (running.find(service => service.State === 'running')) {
-			if (xdebug) {
-				process.env.XDEBUG_MODE = 'debug,develop'
-				process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
-				this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
-				this.success('XDebug started.');
+		try {
+			const running = JSON.parse(exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[];
+			if (running.find(service => service.State === 'running')) {
+				if (xdebug) {
+					process.env.XDEBUG_MODE = 'debug,develop'
+					process.env.TEST_XDEBUG_MODE = 'coverage,develop,debug'
+					this.exec('up -d --remove-orphans', null, { stdio: 'inherit' });
+					this.success('XDebug started.');
+				}
+				this.error('The project is already running.');
 			}
-			this.error('The project is already running.');
+		} catch (error: unknown) {
+			// Continue (no running services)
 		}
 
 		if  (xdebug) {
@@ -114,9 +118,15 @@ export default class DockerCommands extends AbstractCommand {
 			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
 		}
 
-		const running = (JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[])
-			.filter(service => service.State === 'running')
-			.map(service => service.Service);
+		let running = [] as string[];
+
+		try {
+			running = (JSON.parse(this.exec('ps --format json', null, { stdio: 'pipe' }).toString()) as DockerPsItem[])
+				.filter(service => service.State === 'running')
+				.map(service => service.Service);
+		} catch (error: unknown) {
+			// Continue (no running services)
+		}
 
 		const workdirCall = workdir ? `--workdir="${workdir}"` : '';
 
