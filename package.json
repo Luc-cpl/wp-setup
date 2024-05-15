@@ -1,6 +1,6 @@
 {
   "name": "@luc-cpl/wp-setup",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "The WordPress environment setup tool.",
   "type": "module",
   "repository": {
