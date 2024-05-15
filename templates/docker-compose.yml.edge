@@ -30,7 +30,7 @@ services:
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
       @end
       @each(bind in volumes)
-      - "{{bind.host}}:${{bind.container}}:ro"
+      - "{{bind.host}}:{{bind.container}}:ro"
       @end
 
   wp-test:
@@ -59,7 +59,7 @@ services:
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}:ro"
       @end
       @each(bind in volumes)
-      - "{{bind.host}}:${{bind.container}}:ro"
+      - "{{bind.host}}:{{bind.container}}:ro"
       @end
 
   wp-cli:
@@ -89,7 +89,7 @@ services:
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
       @each(bind in volumes)
-      - "{{bind.host}}:${{bind.container}}"
+      - "{{bind.host}}:{{bind.container}}"
       @end
 
   wp-test-cli:
@@ -125,7 +125,7 @@ services:
       - "{{bind.host}}:/var/www/html/wp-content/themes/{{bind.container}}"
       @end
       @each(bind in volumes)
-      - "{{bind.host}}:${{bind.container}}"
+      - "{{bind.host}}:{{bind.container}}"
       @end
 
   database:
