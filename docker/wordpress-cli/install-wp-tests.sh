@@ -145,6 +145,14 @@ install_db() {
 		fi
 	fi
 
+	# Await to the database to be ready, try 30 times with 1 seconds interval
+	for i in {1..30}; do
+		if mysqladmin ping --user="$DB_USER" --password="$DB_PASS"$EXTRA; then
+			break
+		fi
+		sleep 1
+	done
+
 	# create database
 	if [ $(mysql --user="$DB_USER" --password="$DB_PASS"$EXTRA --execute='show databases;' | grep ^$DB_NAME$) ]
 	then
