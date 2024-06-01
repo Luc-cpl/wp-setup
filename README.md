@@ -19,7 +19,7 @@
 This package is intended to be used as a development dependency.
 
 ```bash
-npm install @luc-cpl/wp-setup --save-dev
+npm install wp-setup --save-dev
 ```
 
 Then you can add the following scripts to your `package.json` file:
