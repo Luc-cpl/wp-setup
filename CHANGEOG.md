@@ -7,3 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.5] - 2024-06-01
+
+### Changed
+
+- Change package name to `wp-setup` to simplify package installation
