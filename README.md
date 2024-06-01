@@ -27,7 +27,6 @@ Then you can add the following scripts to your `package.json` file:
 ```json
 {
 	"scripts": {
-		"wp-setup": "wp-setup",
 		"env:start": "wp-setup start",
 		"env:start:xdebug": "wp-setup start --xdebug",
 		"env:stop": "wp-setup stop",
@@ -52,13 +51,7 @@ Then you can add the following scripts to your `package.json` file:
 To initiate the project configuration, you can run the following command:
 
 ```bash
-wp-setup init
-```
-
-if you are using our suggested package.json scripts, you can run:
-
-```bash
-npm run wp-setup init
+npx wp-setup init
 ```
 
 This will create a `wp-setup.json` file in the root of your project containing the necessary configurations to run the WordPress environment. Fell free to edit this file to fit your needs.
@@ -82,7 +75,7 @@ All plugins and themes will be activated at the environment start.
 To start your WordPress environment, you can run the following command:
 
 ```bash
-wp-setup start
+npx wp-setup start
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -94,7 +87,7 @@ npm run env:start
 If you want to start the environment with xdebug support, you can run:
 
 ```bash
-wp-setup start --xdebug
+npx wp-setup start --xdebug
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -131,7 +124,7 @@ For use with **VSCode**, you can add the following configuration to your `.vscod
 To stop your WordPress environment, you can run the following command:
 
 ```bash
-wp-setup stop
+npx wp-setup stop
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -143,7 +136,7 @@ npm run env:stop
 If you want to only stop xdebug, you can run:
 
 ```bash
-wp-setup stop --xdebug
+npx wp-setup stop --xdebug
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -157,7 +150,7 @@ npm run env:stop:xdebug
 To fully destroy your WordPress environment, you can run the following command:
 
 ```bash
-wp-setup destroy
+npx wp-setup destroy
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -171,7 +164,7 @@ npm run env:destroy
 To run a command inside one container, you can run the following command:
 
 ```bash
-wp-setup run <container> <command>
+npx wp-setup run <container> <command>
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -187,7 +180,7 @@ The working directory can be a relative path from the current directory present 
 This allow you to easily run composer commands, for example:
 
 ```bash
-wp-setup run wp-cli --workdir . composer install
+npx wp-setup run wp-cli --workdir . composer install
 ```
 
 If you are using our suggested package.json scripts and the root directory is mounted, you can run:
@@ -202,7 +195,7 @@ npm run env:composer install
 To run a WP CLI command, you can run the following command:
 
 ```bash
-wp-setup wp <command>
+npx wp-setup wp <command>
 ```
 
 if you are using our suggested package.json scripts, you can run:
@@ -218,7 +211,7 @@ WP Setup comes with **Pest 2** and **PHPUnit 10** already configured to run with
 You can easily setup your tests by running the following command:
 
 ```bash
-wp-setup init --tests
+npx wp-setup init --tests
 ```
 
 If you are using our suggested package.json scripts, you can run:
@@ -236,7 +229,7 @@ WP Setup comes with a globally installed Pest CLI to run tests.
 To execute your tests you can run the following command **The environment must be running**:
 
 ```bash
-wp-setup run wp-test-cli -w . global-pest
+npx wp-setup run wp-test-cli -w . global-pest
 ```
 
 If you are using our suggested package.json scripts, you can run:
@@ -248,7 +241,7 @@ npm run env:pest
 Also, you can use your composer installed Pest CLI to run tests:
 
 ```bash
-wp-setup run wp-test-cli -w . ./vendor/bin/pest
+npx wp-setup run wp-test-cli -w . ./vendor/bin/pest
 ```
 
 ### Generating coverage report
@@ -258,7 +251,7 @@ The test environment comes with xdebug support, allowing you to generate coverag
 To generate a coverage report in HTML format, you can run the following command **The environment must be running**:
 
 ```bash
-wp-setup run -w . wp-test-cli global-pest --coverage-html ./tests/coverage
+npx wp-setup run -w . wp-test-cli global-pest --coverage-html ./tests/coverage
 ```
 
 If you are using our suggested package.json scripts, you can run:
@@ -272,7 +265,7 @@ This will generate a `tests/coverage` directory with the coverage report with th
 You can also use the default CLI coverage, but in this case you current need to require Pest locally in your project:
 
 ```bash
-wp-setup run -w . wp-cli composer require pestphp/pest yoast/phpunit-polyfills --dev
+npx wp-setup run -w . wp-cli composer require pestphp/pest yoast/phpunit-polyfills --dev
 ```
 
 Then you can change the `global-pest` calls to `./vendor/bin/pest` in the commands above.
