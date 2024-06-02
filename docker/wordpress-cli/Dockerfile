@@ -1,5 +1,7 @@
 FROM wordpress:cli
 
+ARG IMAGE_VERSION=1.0.0
+
 ARG USER=www-data
 
 USER root

@@ -1,0 +1,86 @@
+name: Build and publish docker images
+on:  
+  push:    
+    branches:
+      - main
+      - development # Remove after testing
+jobs:
+  maybe_build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: 
+          - wordpress-franken
+          - wordpress-cli
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Process vars
+        id: vars
+        run: |
+          IMAGE_DIR=./docker/${{ matrix.image }}
+          IMAGE_VERSION=$(grep -oP '(?<=ARG IMAGE_VERSION=).+' $IMAGE_DIR/Dockerfile)
+          if [[ -z "$IMAGE_VERSION" ]]; then
+            echo "No image version found in Dockerfile"
+            exit 0
+          fi
+          echo "IMAGE_REPOSITORY=${{ matrix.image }}" >> $GITHUB_ENV
+          echo "IMAGE_DIR=$IMAGE_DIR" >> $GITHUB_ENV
+          echo "IMAGE_VERSION=$IMAGE_VERSION" >> $GITHUB_ENV
+
+      - name: Get current version
+        id: current_version
+        if: steps.vars.outputs.IMAGE_VERSION
+        run: |
+          IMAGE_REPOSITORY=${{ steps.vars.outputs.IMAGE_REPOSITORY }}
+          REGISTRY=${{ secrets.DOCKERHUB_REGISTRY }}
+
+          # Get the jwt token from Docker Hub
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME }}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+          # Get the tag latest from the registry
+          IMAGE_DIGEST=$(curl -s -H "Authorization: JWT $TOKEN" -H "Accept: application/json" https://hub.docker.com/v2/repositories/${REGISTRY}/${IMAGE_REPOSITORY}/tags/latest | jq -r '.digest')
+          echo "Image digest found: $IMAGE_DIGEST"
+          if [ -z "$IMAGE_DIGEST" ]; then
+            echo "No image digest found in Docker Hub. Assuming it's the first build."
+            echo "CURRENT_VERSION=0.0.0" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          # Get the other tag with the same digest (the version)
+          DIGESTS=$(curl -s -H "Authorization: JWT $TOKEN" -H "Accept: application/json" https://hub.docker.com/v2/repositories/${REGISTRY}/${IMAGE_REPOSITORY}/tags | jq -r '.results[] | "\(.digest)$\(.name)"')
+          for DIGEST in $DIGESTS; do
+            CURRENT_VERSION=$(echo $DIGEST | cut -d$ -f2)
+            CURRENT_DIGEST=$(echo $DIGEST | cut -d$ -f1)
+            if [ "$CURRENT_DIGEST" = "$IMAGE_DIGEST" -a "$CURRENT_VERSION" != "latest" ]; then
+              echo "Image version found: $CURRENT_VERSION"
+              echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+              exit 0
+              break
+            fi
+          done
+
+          echo "No image version found in Docker Hub. Cannot continue."
+          exit 1
+
+      - name: "Read Semver Info"
+        id: "semver_info"
+        uses: YunaBraska/semver-info-action@main
+        if: steps.vars.outputs.IMAGE_VERSION && steps.current_version.outputs.CURRENT_VERSION
+        with:
+          semver-a: ${{ steps.vars.outputs.IMAGE_VERSION }}
+          semver-b: ${{ steps.current_version.outputs.CURRENT_VERSION }}
+
+      - name: Publish to DockerHub
+        if: steps.semver_info.outputs.is_greater_a && steps.semver_info.outputs.is_stable_a
+        uses: ./.github/actions/image-publisher
+        with:
+          docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          docker_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_registry: ${{ secrets.DOCKERHUB_REGISTRY }}
+          image_repository: ${{ steps.vars.outputs.IMAGE_REPOSITORY }}
+          image_tag: ${{ steps.vars.outputs.IMAGE_VERSION }}
+          image_latest: true
+          file: ${{ steps.vars.outputs.IMAGE_DIR }}/Dockerfile
+          context: ${{ steps.vars.outputs.IMAGE_DIR }}

@@ -3,7 +3,7 @@ version: "3.8"
 services:
   wp:
     build:
-      context: {{root}}docker/wordpress
+      context: {{root}}docker/wordpress-franken
       dockerfile: Dockerfile
     user: "${UID}:${GID}"
     extra_hosts:
