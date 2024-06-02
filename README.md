@@ -12,7 +12,7 @@
 ## Pre-requisites
 
 - [Docker](https://docs.docker.com/get-docker/)
-- [Node.js](https://nodejs.org/en/download/) >= 16 (16 may throw warnings during installation but it should work fine)
+- [Node.js](https://nodejs.org/en/download/) >= 18 (16 may throw warnings during installation but it should work fine)
 
 ## Installation
 
