@@ -15,9 +15,9 @@ export default class MakerCommands extends AbstractCommand {
 
 			await renderAndSave('wp-setup.json', setupFile, { projectName }, true);
 
-			this.success('Setup file created.', false);
-			this.success('Please edit wp-setup.json to configure the project.', false);
-			this.success('Run `wp-setup start` to start the project.', false);
+			this.log('Setup file created.');
+			this.log('Please edit wp-setup.json to configure the project.');
+			this.log('Run `wp-setup start` to start the project.');
 			this.success();
 		}
 

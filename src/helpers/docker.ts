@@ -1,30 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
 import { VolumeInterface } from '@/interfaces/docker';
 import { download, exists, extract, path, rm } from './fs';
-
-let files = [] as string[];
-
-export const getComposeFiles = () => {
-	if (files.length) {
-		return files;
-	}
-
-	const jsonFile = path('build/docker-compose-files.json');
-
-	if (!exists(jsonFile)) {
-		return [];
-	}
-
-	try {
-		files = JSON.parse(readFileSync(jsonFile).toString());
-	} catch (e) {
-		rm(jsonFile);
-		files = [];
-	}
-	return files;
-}
 
 export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
 	if (typeof value !== 'string') {
@@ -45,7 +21,7 @@ export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
  	return response;
 }
 
-export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[], type: string): Promise<VolumeInterface[]> => {
+export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[], type: string, beforeCallback: Function): Promise<VolumeInterface[]> => {
 	const tmpDir = path(`build/tmp/${type}`);
 	const destination = path(`build/${type}`);
 
@@ -72,6 +48,7 @@ export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[]
 			}
 		}
 
+		beforeCallback(fileName, tmpFile);
 		const file = await download(url, tmpFile);
 
 		await extract(file.path.toString(), destination);

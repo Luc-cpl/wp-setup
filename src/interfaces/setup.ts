@@ -5,7 +5,7 @@ export interface ConfigInterface {
     include: string;
     host: string;
     multisite: boolean|'subdomain'|'subdirectory';
-    plugins: string[]|VolumeInterface[];
-    themes: string[]|VolumeInterface[];
-    volumes: string[]|VolumeInterface[];
+    plugins: Array<string|VolumeInterface>;
+    themes: Array<string|VolumeInterface>;
+    volumes: Array<string|VolumeInterface>;
 }

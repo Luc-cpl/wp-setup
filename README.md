@@ -281,7 +281,6 @@ Then you can change the `global-pest` calls to `./vendor/bin/pest` in the comman
 	- [x] - Add custom project name.
 	- [x] - Activate themes and plugins.
 	- [x] - Add custom host name.
-	- [ ] - Edit /etc/hosts file to add custom host name.
 	- [x] - Add multisite support.
 	- [x] - Add xdebug support.
 	- [x] - download plugins and themes from links during start.

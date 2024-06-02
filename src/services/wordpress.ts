@@ -13,12 +13,6 @@ export const runSetup: RunSetupInterface = async ({cliContainer, host, multisite
 
 	await install(cliContainer, host, multisite, exec);
 
-	await Promise.all([
-		installTheme(cliContainer, 'twentytwentyfour', exec),
-		deletePlugin(cliContainer, ['hello', 'akismet'], exec),
-		deleteTheme(cliContainer, ['twentytwentythree', 'twentytwentytwo'], exec),
-	]);
-
 	const getList = (array: VolumeInterface[]) => array.map(volume => volume.container).join(' ');
 
 	const pluginsList = getList(plugins ?? [])
@@ -48,7 +42,7 @@ export const install: InstallInterface = async (cliContainer, host, multisite, e
 				'--admin_password=password',
 				'--admin_email=admin@email.com',
 			];
-			exec(`exec ${cliContainer} wp core install ${flags.join(' ')}`, null, { stdio: 'pipe' });
+			await exec(`exec ${cliContainer} wp core install ${flags.join(' ')}`, { stdio: 'pipe' });
 			installed = true;
 		} catch (error) {
 			if (tryCount > 10) {
@@ -63,7 +57,7 @@ export const install: InstallInterface = async (cliContainer, host, multisite, e
 		const type = multisite === true ? 'subdirectory' : multisite;
 		const subdomain = type === 'subdomain' ? '--subdomains' : '';
 		try {
-			exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
+			await exec(`exec ${cliContainer} wp core multisite-convert ${subdomain}`);
 		} catch (e) {/* empty */}
 	}
 
@@ -71,21 +65,21 @@ export const install: InstallInterface = async (cliContainer, host, multisite, e
 	const gid = process.env.GID ?? 33;
 
 	// Get the current user and group of the wp-content directory
-	const output = exec(`exec ${cliContainer} ls -ld wp-content`, null, { stdio: 'pipe' }).toString().trim();
+	const output = (await exec(`exec ${cliContainer} ls -ld wp-content`, { stdio: 'pipe' })).toString().trim();
 	const parts = output.split(/\s+/);
 	const currentUser = parts[2];
 	const currentGroup = parts[3];
 
 	// Ensure we can write to the wp-content directory
 	if (currentUser !== uid || currentGroup !== gid) {
-		exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`);
+		await exec(`run --rm --user root ${cliContainer} chown ${uid}:${gid} wp-content`);
 	}
 }
 
 export const deletePlugin: PluginHandlerInterface = async (cliContainer, plugin, exec) => {
 	const pluginList = Array.isArray(plugin) ? plugin : [plugin];
 	try {
-		exec(`exec ${cliContainer} wp plugin delete ${pluginList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp plugin delete ${pluginList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;
@@ -95,7 +89,7 @@ export const deletePlugin: PluginHandlerInterface = async (cliContainer, plugin,
 export const deleteTheme: PluginHandlerInterface = async (cliContainer, theme, exec) => {
 	const themeList = Array.isArray(theme) ? theme : [theme];
 	try {
-		exec(`exec ${cliContainer} wp theme delete ${themeList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp theme delete ${themeList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;
@@ -105,7 +99,7 @@ export const deleteTheme: PluginHandlerInterface = async (cliContainer, theme, e
 export const installPlugin: PluginHandlerInterface = async (cliContainer, plugin, exec) => {
 	const pluginList = Array.isArray(plugin) ? plugin : [plugin];
 	try {
-		exec(`exec ${cliContainer} wp plugin install ${pluginList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp plugin install ${pluginList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;
@@ -115,7 +109,7 @@ export const installPlugin: PluginHandlerInterface = async (cliContainer, plugin
 export const installTheme: PluginHandlerInterface = async (cliContainer, theme, exec) => {
 	const themeList = Array.isArray(theme) ? theme : [theme];
 	try {
-		exec(`exec ${cliContainer} wp theme install ${themeList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp theme install ${themeList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;
@@ -126,7 +120,7 @@ export const activatePlugin: MultisitePluginHandlerInterface = async (cliContain
 	const pluginList = Array.isArray(plugin) ? plugin : [plugin];
 	const multisiteFlag = multisite ? '--network' : '';
 	try {
-		exec(`exec ${cliContainer} wp plugin activate ${multisiteFlag} ${pluginList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp plugin activate ${multisiteFlag} ${pluginList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;
@@ -136,7 +130,7 @@ export const activatePlugin: MultisitePluginHandlerInterface = async (cliContain
 export const activateTheme: PluginHandlerInterface = async (cliContainer, theme, exec) => {
 	const themeList = Array.isArray(theme) ? theme : [theme];
 	try {
-		exec(`exec ${cliContainer} wp theme activate ${themeList.join(' ')}`);
+		await exec(`exec ${cliContainer} wp theme activate ${themeList.join(' ')}`);
 		return true;
 	} catch (e) {
 		return false;

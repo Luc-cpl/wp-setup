@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Console log colors for better readability
+
+### Changed
+
+- Generate the docker-compose template file on each request to avoid errors and allow global installation
+- Do not install Twenty Twenty-Four theme on setup to improve loading time
+
+### Fixed
+
+- Fix the ConfigInterface to correct assign the volumes related arrays
+
 ## [1.1.5] - 2024-06-01
 
 ### Changed

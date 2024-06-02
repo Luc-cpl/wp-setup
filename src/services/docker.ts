@@ -1,13 +1,12 @@
 import { ExecSyncOptions, execSync } from 'child_process';
-import { getComposeFiles } from '@/helpers/docker';
 import { getProjectName } from '@/helpers/cli';
 
 import { ComposeExecInterface, DockerPsItem } from '@/interfaces/docker';
 import { ConfigInterface } from '@/interfaces/setup';
-import { renderAndSave, save } from './template';
+import { renderAndSave } from './template';
 
-export const exec: ComposeExecInterface = (command, files = null, options = { stdio: 'inherit' }) => {
-	files = files ?? getComposeFiles();
+export const exec: ComposeExecInterface = async (config, command, options = { stdio: 'inherit' }) => {
+	const files = await parseComposeFiles(config)
 	const projectName = getProjectName();
 	const dockerCommand = `docker compose -p ${projectName} ${files.map(f => `-f ${f}`).join(' ')} ${command}`;
 
@@ -41,14 +40,12 @@ export const parseComposeFiles = async (config: ConfigInterface): Promise<string
 		files.push(config.include);
 	}
 
-	save('docker-compose-files.json', JSON.stringify(files));
-
 	return files;
 }
 
-export const getServices = () => {
+export const getServices = async (config: ConfigInterface) => {
 	try {
-		let jsonStr = exec('ps --format json', null, { stdio: 'pipe' }).toString();
+		let jsonStr = (await exec(config, 'ps --format json', { stdio: 'pipe' })).toString();
 		/**
 		 * In older versions of Docker, the output will be correctly formatted as JSON,
 		 * since docker compose 2.21, the output an invalid JSON string.

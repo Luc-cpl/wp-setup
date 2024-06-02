@@ -1,4 +1,5 @@
 import { ExecSyncOptions } from "child_process";
+import { ConfigInterface } from "./setup";
 
 export interface VolumeInterface {
     host: string;
@@ -6,7 +7,7 @@ export interface VolumeInterface {
 }
 
 export interface ComposeExecInterface {
-	(command: string, files?: string[] | null, options?: ExecSyncOptions): string | Buffer;
+	(config: ConfigInterface, command: string, options?: ExecSyncOptions): Promise<string | Buffer>;
 }
 
 export interface DockerPsItem {
