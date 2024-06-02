@@ -1,6 +1,6 @@
 FROM wordpress:cli
 
-ARG IMAGE_VERSION=1.0.0
+ARG IMAGE_VERSION=1.0.1
 
 ARG USER=www-data
 
