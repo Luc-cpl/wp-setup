@@ -42,11 +42,12 @@ jobs:
 
           # Get the tag latest from the registry
           IMAGE_DIGEST=$(curl -s -H "Authorization: JWT $TOKEN" -H "Accept: application/json" https://hub.docker.com/v2/repositories/${REGISTRY}/${IMAGE_REPOSITORY}/tags/latest | jq -r '.digest')
-          echo "Image digest found: $IMAGE_DIGEST"
-          if [ -z "$IMAGE_DIGEST" ]; then
+          if [ "$IMAGE_DIGEST" == "null" ]; then
             echo "No image digest found in Docker Hub. Assuming it's the first build."
             echo "CURRENT_VERSION=0.0.0" >> $GITHUB_OUTPUT
             exit 0
+          else
+            echo "Image digest found: $IMAGE_DIGEST"
           fi
 
           # Get the other tag with the same digest (the version)
