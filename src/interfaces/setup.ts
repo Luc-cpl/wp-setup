@@ -2,6 +2,7 @@ import { VolumeInterface } from "./docker";
 
 export interface ConfigInterface {
     [key: string]: unknown;
+    editor: 'vscode' | null;
     include: string;
     host: string;
     multisite: boolean|'subdomain'|'subdirectory';

@@ -11,6 +11,8 @@ export interface ComposeExecInterface {
 }
 
 export interface DockerPsItem {
+	ID: string;
+	Name: string;
 	State: string;
 	Service: string;
 }

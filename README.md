@@ -270,6 +270,29 @@ npx wp-setup run -w . wp-cli composer require pestphp/pest yoast/phpunit-polyfil
 
 Then you can change the `global-pest` calls to `./vendor/bin/pest` in the commands above.
 
+
+## Running in devcontainer
+
+If you are using [VSCode](https://code.visualstudio.com/), you can easily run your project in a devcontainer with the following command:
+
+```bash
+npx wp-setup code
+```
+
+This will open the WP CLI container in your editor at WordPress root directory.
+
+Optionally, you can pass the `--workdir` (`-w`) flag to change the working directory with support to your mapped volumes in your setup configuration.
+
+```bash
+npx wp-setup code --workdir .
+```
+
+If you want to open using the test CLI container, you can run with the `--test` flag:
+
+```bash
+npx wp-setup code --test
+```
+
 ## Todo
 
 - [x] - Start Command

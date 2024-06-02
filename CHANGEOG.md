@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Console log colors for better readability
+- Add a guest user home directory in CLI container to avoid permission issues
+- Add `wp-setup code` command to open the project with Visual Studio Code with devcontainer support
 
 ### Changed
 

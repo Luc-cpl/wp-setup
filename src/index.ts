@@ -53,4 +53,11 @@ program.command('wp-test')
   .allowUnknownOption()
   .action(command => docker.wpCliTest(command));
 
+program.command('code')
+  .description('Open the code editor in the development environment.')
+  .option('-w, --workdir <directory>', 'Can be a binded relative path from host or an absolute path in the container (default to service workdir).')
+  .option('-e, --editor <editor>', 'The code editor to use (default to the one in the setup file).')
+  .option('--test', 'Open the code editor in the test environment.', false)
+  .action(options => docker.code(options));
+
 program.parse();

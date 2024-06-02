@@ -1,6 +1,7 @@
 import AbstractCommand from './abstractCommand';
 import { ExecSyncOptions } from 'node:child_process';
 import { join } from 'node:path';
+import { exec as coreExec } from 'node:child_process';
 import { VolumeInterface } from '@/interfaces/docker';
 import { SetupInterface } from '@/interfaces/wordpress';
 import { parseVolume } from '@/helpers/docker';
@@ -9,6 +10,7 @@ import { confirm } from "@/helpers/cli";
 import { deleteVolume, exec, getServices } from "@/services/docker";
 import { render } from "@/services/template";
 import { runSetup } from '@/services/wordpress';
+import { ConfigInterface } from '@/interfaces/setup';
 
 export default class DockerCommands extends AbstractCommand {
 	public async start({ xdebug } : { xdebug?: boolean }) {
@@ -81,21 +83,7 @@ export default class DockerCommands extends AbstractCommand {
 			this.error(`The service "${service}" does not exist.`);
 		}
 
-		if (workdir && setupFile && !workdir.startsWith('/')) {
-			const setContainerPath = (volume: VolumeInterface, basePath = '') => ({
-				host: volume.host.includes('${PWD}') ? volume.host.replace('${PWD}', process.cwd()) : volume.host,
-				container: basePath + volume.container,
-			});
-
-			const plugins = (setupFile.plugins ?? []).map(parseVolume)
-				.map(volume => setContainerPath(volume, '/var/www/html/wp-content/plugins/'));
-			const themes = (setupFile.themes ?? []).map(parseVolume)
-				.map(volume => setContainerPath(volume, '/var/www/html/wp-content/themes/'));
-			const volumes = (setupFile.themes ?? []).map(parseVolume)
-				.map(volume => setContainerPath(volume));
-			const directory = join(process.cwd(), workdir);
-			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
-		}
+		workdir = this.getWorkdir(setupFile, workdir);
 
 		const config = await this.getConfig();
 		const running = (await getServices(config))
@@ -124,6 +112,58 @@ export default class DockerCommands extends AbstractCommand {
 	async wpCliTest(command: string[]) {
 		command.unshift('wp');
 		return this.run('wp-test-cli', command);
+	}
+
+	async code({ editor, workdir = false, test = false } : { workdir: string|false, editor?: string, test: boolean }) {
+		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
+		workdir = this.getWorkdir(setupFile, workdir);
+		editor = editor ?? setupFile?.editor ?? 'vscode';
+		const serviceName = test ? 'wp-test-cli' : 'wp-cli';
+		const service = (await getServices(await this.getConfig()))
+			.filter(service => service.State === 'running')
+			.find(service => service.Service === serviceName);
+
+		if (!service) {
+			this.error(`The service "${serviceName}" is not running.`);
+		}
+
+		const containerHex = this.containerIdToHex(service?.ID ?? '');
+
+		if (editor === 'vscode') {
+			const command = `code --folder-uri=vscode-remote://attached-container+${containerHex}${workdir ? workdir : '/var/www/html'}`;
+			coreExec(command);
+			this.success();
+		}
+
+		this.error(`The editor "${editor}" is not supported.`);
+	}
+
+	private containerIdToHex(containerId: string) {
+		let hexString = '';
+		for (let i = 0; i < containerId.length; i++) {
+			hexString += containerId.charCodeAt(i).toString(16).padStart(2, '0');
+		}
+		return hexString;
+	}
+
+	private getWorkdir(setupFile: ConfigInterface|null, workdir: string|false) {
+		if (workdir && setupFile && !workdir.startsWith('/')) {
+			const setContainerPath = (volume: VolumeInterface, basePath = '') => ({
+				host: volume.host.includes('${PWD}') ? volume.host.replace('${PWD}', process.cwd()) : volume.host,
+				container: basePath + volume.container,
+			});
+
+			const plugins = (setupFile.plugins ?? []).map(parseVolume)
+				.map(volume => setContainerPath(volume, '/var/www/html/wp-content/plugins/'));
+			const themes = (setupFile.themes ?? []).map(parseVolume)
+				.map(volume => setContainerPath(volume, '/var/www/html/wp-content/themes/'));
+			const volumes = (setupFile.themes ?? []).map(parseVolume)
+				.map(volume => setContainerPath(volume));
+			const directory = join(process.cwd(), workdir);
+			workdir = [...plugins, ...themes, ...volumes].find(volume => volume.host === directory)?.container ?? workdir;
+		}
+
+		return workdir;
 	}
 
 	private exec = async (command: string, options = {} as ExecSyncOptions) => {

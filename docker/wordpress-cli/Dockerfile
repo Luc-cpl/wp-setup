@@ -36,4 +36,8 @@ RUN chmod -R 777 /wordpress-tests-lib
 RUN mv /usr/local/bin/install-wp-tests.sh /usr/local/bin/install-wp-tests
 RUN chmod +x /usr/local/bin/install-wp-tests
 
+# Create a single home directory for all users
+RUN mkdir -p /home/guest && chmod 777 /home/guest
+ENV HOME=/home/guest
+
 USER ${USER}
