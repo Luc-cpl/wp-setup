@@ -25,13 +25,14 @@ jobs:
             echo "No image version found in Dockerfile"
             exit 0
           fi
+          echo "Image version found: $IMAGE_VERSION"
           echo "IMAGE_REPOSITORY=${{ matrix.image }}" >> $GITHUB_ENV
           echo "IMAGE_DIR=$IMAGE_DIR" >> $GITHUB_ENV
           echo "IMAGE_VERSION=$IMAGE_VERSION" >> $GITHUB_ENV
 
       - name: Get current version
         id: current_version
-        if: steps.vars.outputs.IMAGE_VERSION
+        if: ${{ steps.vars.outputs.IMAGE_VERSION }}
         run: |
           IMAGE_REPOSITORY=${{ steps.vars.outputs.IMAGE_REPOSITORY }}
           REGISTRY=${{ secrets.DOCKERHUB_REGISTRY }}
@@ -67,13 +68,13 @@ jobs:
       - name: "Read Semver Info"
         id: "semver_info"
         uses: YunaBraska/semver-info-action@main
-        if: steps.vars.outputs.IMAGE_VERSION && steps.current_version.outputs.CURRENT_VERSION
+        if: ${{ steps.vars.outputs.IMAGE_VERSION }} && ${{ steps.current_version.outputs.CURRENT_VERSION }}
         with:
           semver-a: ${{ steps.vars.outputs.IMAGE_VERSION }}
           semver-b: ${{ steps.current_version.outputs.CURRENT_VERSION }}
 
       - name: Publish to DockerHub
-        if: steps.semver_info.outputs.is_greater_a && steps.semver_info.outputs.is_stable_a
+        if: ${{ steps.semver_info.outputs.is_greater_a }} && ${{ steps.semver_info.outputs.is_stable_a }}
         uses: ./.github/actions/image-publisher
         with:
           docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
