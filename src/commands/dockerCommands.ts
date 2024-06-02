@@ -74,7 +74,7 @@ export default class DockerCommands extends AbstractCommand {
 	}
 
 	public async run(service: string, command: string[], workdir: string|false = false) {
-		const services = await this.exec('config --services', { stdio: 'pipe' }).toString().split('\n');
+		const services = (await this.exec('config --services', { stdio: 'pipe' })).toString().split('\n');
 		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 
 		if (!services.includes(service)) {
