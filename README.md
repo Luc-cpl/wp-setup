@@ -318,7 +318,7 @@ npx wp-setup code --test
 - [x] - Prefix the project name to avoid naming collisions.
 - [ ] - Allow custom WordPress version.
 - [ ] - Add test coverage for the project.
-- [ ] - Add Docker images to Docker Hub.
+- [x] - Add Docker images to Docker Hub.
 
 ## Code Reference
 

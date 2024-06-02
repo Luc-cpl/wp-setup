@@ -2,9 +2,7 @@ version: "3.8"
 
 services:
   wp:
-    build:
-      context: {{root}}docker/wordpress-franken
-      dockerfile: Dockerfile
+    image: luccpl/wordpress-franken:1.0
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -34,9 +32,7 @@ services:
       @end
 
   wp-test:
-    build:
-      context: {{root}}docker/wordpress-franken
-      dockerfile: Dockerfile
+    image: luccpl/wordpress-franken:1.0
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -63,9 +59,7 @@ services:
       @end
 
   wp-cli:
-    build:
-      context: {{root}}docker/wordpress-cli
-      dockerfile: Dockerfile
+    image: luccpl/wordpress-cli:1.0
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -93,9 +87,7 @@ services:
       @end
 
   wp-test-cli:
-    build:
-      context: {{root}}docker/wordpress-cli
-      dockerfile: Dockerfile
+    image: luccpl/wordpress-cli:1.0
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -129,7 +121,7 @@ services:
       @end
 
   database:
-    image: "mariadb"
+    image: mariadb
     volumes:
       - "database:/var/lib/mysql"
     environment:
@@ -139,7 +131,7 @@ services:
     restart: "unless-stopped"
 
   database-test:
-    image: "mariadb"
+    image: mariadb
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: "wordpress"

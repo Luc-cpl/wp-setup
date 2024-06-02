@@ -1,4 +1,4 @@
-name: Build and publish docker images
+name: Build and publish docker images if needed
 on:  
   push:    
     branches:
@@ -55,7 +55,8 @@ jobs:
           for DIGEST in $DIGESTS; do
             CURRENT_VERSION=$(echo $DIGEST | cut -d$ -f2)
             CURRENT_DIGEST=$(echo $DIGEST | cut -d$ -f1)
-            if [ "$CURRENT_DIGEST" = "$IMAGE_DIGEST" -a "$CURRENT_VERSION" != "latest" ]; then
+            # If the digest is the same as the latest tag and follow the semver pattern, we found the version
+            if [[ "$CURRENT_DIGEST" == "$IMAGE_DIGEST" && "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "Image version found: $CURRENT_VERSION"
               echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
               exit 0

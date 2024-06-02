@@ -55,10 +55,20 @@ runs:
         IMAGE="$REGISTRY/$REPOSITORY"
         echo "IMAGE=${IMAGE}" >> $GITHUB_OUTPUT
         echo "TAG=${TAG}" >> $GITHUB_OUTPUT
-        echo "TAGGED_IMAGE=${IMAGE}:${TAG}" >> $GITHUB_OUTPUT
-        if [ "${{ inputs.image_latest }}" = "true" ]; then
-          echo "TAGGED_IMAGE=${IMAGE}:${TAG},${IMAGE}:latest" >> $GITHUB_OUTPUT
+
+        TAGS="${IMAGE}:${TAG}"
+
+        # If the tag follows the semver pattern, tag it with major and minor versions
+        if [[ $TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          TAGS="$TAGS,${IMAGE}:${TAG%.*}"
+          TAGS="$TAGS,${IMAGE}:${TAG%%.*}"
         fi
+
+        if [ "${{ inputs.image_latest }}" = "true" ]; then
+          TAGS="$TAGS,${IMAGE}:latest"
+        fi
+
+        echo "TAGS=${TAGS}" >> $GITHUB_OUTPUT
 
     - name: Build and push
       uses: docker/build-push-action@v3
@@ -67,6 +77,6 @@ runs:
         context: ${{ inputs.context }}
         file: ${{ inputs.file }}
         platforms: linux/amd64, linux/arm64
-        tags: ${{ steps.prep.outputs.TAGGED_IMAGE }}
+        tags: ${{ steps.prep.outputs.TAGS }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
