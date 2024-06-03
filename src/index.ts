@@ -35,7 +35,7 @@ program.command('stop')
 
 program.command('run')
   .description('Run a command in the development environment.')
-  .option('-w, --workdir <directory>', 'Can be a binded relative path from host or an absolute path in the container (default to service workdir).')
+  .option('-w, --workdir <directory>', 'Can be a binded relative volume from host or an absolute path in the container (default to service workdir).')
   .argument('<service>', 'The service to run the command on.')
   .argument('<command...>', 'The command to run in the service.')
   .allowUnknownOption()
@@ -55,9 +55,9 @@ program.command('wp-test')
 
 program.command('code')
   .description('Open the code editor in the development environment.')
-  .option('-w, --workdir <directory>', 'Can be a binded relative path from host or an absolute path in the container (default to service workdir).')
+  .argument('<workdir>', 'The directory to open. Can be a binded relative volume from host or an absolute path in the container (default to service workdir).')
   .option('-e, --editor <editor>', 'The code editor to use (default to the one in the setup file).')
   .option('--test', 'Open the code editor in the test environment.', false)
-  .action(options => docker.code(options));
+  .action((workdir, options) => docker.code({...options, workdir}));
 
 program.parse();

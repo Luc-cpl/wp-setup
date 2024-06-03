@@ -281,10 +281,12 @@ npx wp-setup code
 
 This will open the WP CLI container in your editor at WordPress root directory.
 
-Optionally, you can pass the `--workdir` (`-w`) flag to change the working directory with support to your mapped volumes in your setup configuration.
+Optionally, you can pass a path to change the working directory with support to your mapped volumes in your setup configuration.
 
 ```bash
-npx wp-setup code --workdir .
+npx wp-setup code .
+# or
+npx wp-setup code ./path/to/your/plugin
 ```
 
 If you want to open using the test CLI container, you can run with the `--test` flag:
