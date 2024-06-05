@@ -55,7 +55,7 @@ program.command('wp-test')
 
 program.command('code')
   .description('Open the code editor in the development environment.')
-  .argument('<workdir>', 'The directory to open. Can be a binded relative volume from host or an absolute path in the container (default to service workdir).')
+  .argument('[workdir]', 'The directory to open. Can be a binded relative volume from host or an absolute path in the container (default to service workdir).', false)
   .option('-e, --editor <editor>', 'The code editor to use (default to the one in the setup file).')
   .option('--test', 'Open the code editor in the test environment.', false)
   .action((workdir, options) => docker.code({...options, workdir}));

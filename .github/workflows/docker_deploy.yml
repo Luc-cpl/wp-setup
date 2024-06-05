@@ -3,7 +3,6 @@ on:
   push:    
     branches:
       - main
-      - development # Remove after testing
 jobs:
   maybe_build:
     runs-on: ubuntu-latest

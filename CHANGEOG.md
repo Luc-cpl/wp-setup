@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a guest user home directory in CLI container to avoid permission issues
 - Add `wp-setup code` command to open the project with Visual Studio Code with devcontainer support
 - Add docker images to Docker Hub for easier access and faster setup
+- Add node 22 in CLI container with support to npm, yarn and pnpm
 
 ### Changed
 

@@ -107,7 +107,7 @@ services:
       @endif
     depends_on:
       - "wp-test"
-    {{--  restart: "unless-stopped"  --}}
+    restart: "unless-stopped"
     volumes:
       - "wp-test:/var/www/html:rw"
       @each(bind in plugins)

@@ -1,10 +1,20 @@
+FROM node:22-alpine AS node
+
 FROM wordpress:cli
 
-ARG IMAGE_VERSION=1.0.0
+ARG IMAGE_VERSION=1.1.0
 
 ARG USER=www-data
 
 USER root
+
+# Install node from the official node image
+COPY --from=node /usr/lib /usr/lib
+COPY --from=node /usr/local/lib /usr/local/lib
+COPY --from=node /usr/local/include /usr/local/include
+COPY --from=node /usr/local/bin /usr/local/bin
+RUN npm install -g yarn --force
+RUN npm install -g pnpm --force
 
 RUN apk --no-cache add pcre-dev linux-headers ${PHPIZE_DEPS}
 RUN pecl install xdebug && docker-php-ext-enable xdebug
