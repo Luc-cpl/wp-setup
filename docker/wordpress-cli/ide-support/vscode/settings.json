@@ -1,4 +1,7 @@
 {
+	"extensions": [
+		"xdebug.php-debug"
+	],
 	"terminal.integrated.env.linux": {
 		"XDEBUG_CLIENT_HOST": "localhost"
 	},
