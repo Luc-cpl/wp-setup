@@ -1,8 +1,7 @@
 import AbstractCommand from './abstractCommand';
 import { ExecSyncOptions } from 'node:child_process';
 import { join } from 'node:path';
-import { exec as coreExec } from 'node:child_process';
-import { VolumeInterface } from '@/interfaces/docker';
+import { DockerPsItem, VolumeInterface } from '@/interfaces/docker';
 import { SetupInterface } from '@/interfaces/wordpress';
 import { parseVolume } from '@/helpers/docker';
 import { getJsonFile } from '@/helpers/fs';
@@ -11,6 +10,7 @@ import { deleteVolume, exec, getServices } from "@/services/docker";
 import { render } from "@/services/template";
 import { runSetup } from '@/services/wordpress';
 import { ConfigInterface } from '@/interfaces/setup';
+import { getVSCodeConfig, startVSCode } from '@/services/ideSupport';
 
 export default class DockerCommands extends AbstractCommand {
 	public async start({ xdebug } : { xdebug?: boolean }) {
@@ -83,13 +83,12 @@ export default class DockerCommands extends AbstractCommand {
 			this.error(`The service "${service}" does not exist.`);
 		}
 
-		workdir = this.getWorkdir(setupFile, workdir);
-
 		const config = await this.getConfig();
 		const running = (await getServices(config))
 			.filter(service => service.State === 'running')
 			.map(service => service.Service);
 
+		workdir = this.getWorkdir(config, workdir);
 		const workdirCall = workdir ? `--workdir="${workdir}"` : '';
 
 		try {
@@ -115,11 +114,11 @@ export default class DockerCommands extends AbstractCommand {
 	}
 
 	async code({ editor, workdir = false, test = false } : { workdir: string|false, editor?: string, test: boolean }) {
-		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
-		workdir = this.getWorkdir(setupFile, workdir);
-		editor = editor ?? setupFile?.editor ?? 'vscode';
+		const config = await this.getConfig();
+		workdir = this.getWorkdir(config, workdir);
+		editor = editor ?? config.editor ?? 'vscode';
 		const serviceName = test ? 'wp-test-cli' : 'wp-cli';
-		const service = (await getServices(await this.getConfig()))
+		const service = (await getServices(config))
 			.filter(service => service.State === 'running')
 			.find(service => service.Service === serviceName);
 
@@ -127,23 +126,22 @@ export default class DockerCommands extends AbstractCommand {
 			this.error(`The service "${serviceName}" is not running.`);
 		}
 
-		const containerHex = this.containerIdToHex(service?.ID ?? '');
+		config.editorConfig = {
+			...config.editorConfig ?? {},
+			vscode: getVSCodeConfig(config),
+		};
 
-		if (editor === 'vscode') {
-			const command = `code --folder-uri=vscode-remote://attached-container+${containerHex}${workdir ? workdir : '/var/www/html'}`;
-			coreExec(command);
-			this.success();
+		switch (editor) {
+			case 'vscode':
+				startVSCode(config, service as DockerPsItem, workdir ? workdir : '/var/www/html');
+				break;
+		
+			default:
+				this.error(`The editor "${editor}" is not supported.`);
+				break;
 		}
 
-		this.error(`The editor "${editor}" is not supported.`);
-	}
-
-	private containerIdToHex(containerId: string) {
-		let hexString = '';
-		for (let i = 0; i < containerId.length; i++) {
-			hexString += containerId.charCodeAt(i).toString(16).padStart(2, '0');
-		}
-		return hexString;
+		this.success();		
 	}
 
 	private getWorkdir(setupFile: ConfigInterface|null, workdir: string|false) {

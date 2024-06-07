@@ -15,4 +15,5 @@ export interface DockerPsItem {
 	Name: string;
 	State: string;
 	Service: string;
+	Project: string;
 }
