@@ -13,6 +13,8 @@ services:
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+      XDEBUG_CLIENT_HOST: "wp-cli"
+      XDEBUG_DISCOVERY_CLIENT_HOST: "on"
     depends_on:
       - "database"
     ports:
@@ -43,6 +45,8 @@ services:
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+      XDEBUG_CLIENT_HOST: "wp-test-cli"
+      XDEBUG_DISCOVERY_CLIENT_HOST: "on"
     depends_on:
       - "database-test"
     restart: "unless-stopped"
@@ -59,7 +63,7 @@ services:
       @end
 
   wp-cli:
-    image: luccpl/wordpress-cli:1.0
+    image: luccpl/wordpress-cli:1.1
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -70,6 +74,7 @@ services:
       WORDPRESS_DB_NAME: "wordpress"
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
+      XDEBUG_CLIENT_HOST: "host.docker.internal"
       XDEBUG_MODE: "${TEST_XDEBUG_MODE:-coverage}"
     depends_on:
       - "wp"
@@ -87,7 +92,7 @@ services:
       @end
 
   wp-test-cli:
-    image: luccpl/wordpress-cli:1.0
+    image: luccpl/wordpress-cli:1.1
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -102,6 +107,7 @@ services:
       WORDPRESS_DB_PASSWORD: ""
       WORDPRESS_DB_USER: "root"
       XDEBUG_MODE: "${TEST_XDEBUG_MODE:-coverage}"
+      XDEBUG_CLIENT_HOST: "host.docker.internal"
       @if(multisite)
       WP_TESTS_MULTISITE: {{multisite}}
       @endif

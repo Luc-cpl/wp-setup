@@ -1,6 +1,6 @@
 FROM dunglas/frankenphp:latest-php8.2
 
-ARG IMAGE_VERSION=1.0.0
+ARG IMAGE_VERSION=1.0.1
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN install-php-extensions \
@@ -15,9 +15,10 @@ RUN install-php-extensions \
     xdebug
 
 # configure xdebug
-RUN echo "xdebug.mode=${XDEBUG_MODE:-off}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.mode=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.client_host=\${XDEBUG_CLIENT_HOST}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.discover_client_host=\${XDEBUG_DISCOVERY_CLIENT_HOST}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 COPY --from=wordpress /usr/local/etc/php/conf.d/* /usr/local/etc/php/conf.d/
 COPY --from=wordpress /usr/local/bin/docker-entrypoint.sh /usr/local/bin/

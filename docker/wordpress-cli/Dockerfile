@@ -20,12 +20,13 @@ RUN apk --no-cache add pcre-dev linux-headers ${PHPIZE_DEPS}
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 RUN apk del pcre-dev ${PHPIZE_DEPS}
 
-RUN apk add subversion
+RUN apk add subversion git
 
 # configure xdebug
-RUN echo "xdebug.mode=${XDEBUG_MODE:-off}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.mode=off" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.client_host=\${XDEBUG_CLIENT_HOST}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN echo "xdebug.discover_client_host=\${XDEBUG_DISCOVERY_CLIENT_HOST}" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 # Allow global packages from arbitrary docker users
@@ -49,5 +50,8 @@ RUN chmod +x /usr/local/bin/install-wp-tests
 # Create a single home directory for all users
 RUN mkdir -p /home/guest && chmod 777 /home/guest
 ENV HOME=/home/guest
+
+# Add editor settings
+COPY ide-support/vscode/settings.json /home/guest/.vscode/settings.json
 
 USER ${USER}

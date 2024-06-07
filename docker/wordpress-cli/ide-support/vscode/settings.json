@@ -1,0 +1,11 @@
+{
+	"terminal.integrated.env.linux": {
+		"XDEBUG_CLIENT_HOST": "localhost"
+	},
+	"terminal.integrated.env.osx": {
+		"XDEBUG_CLIENT_HOST": "localhost"
+	},
+	"terminal.integrated.env.windows": {
+		"XDEBUG_CLIENT_HOST": "localhost"
+	}
+}
