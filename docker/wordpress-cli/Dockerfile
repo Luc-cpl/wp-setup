@@ -51,7 +51,4 @@ RUN chmod +x /usr/local/bin/install-wp-tests
 RUN mkdir -p /home/guest && chmod 777 /home/guest
 ENV HOME=/home/guest
 
-# Add editor settings
-COPY ide-support/vscode/settings.json /home/guest/.vscode/settings.json
-
 USER ${USER}
