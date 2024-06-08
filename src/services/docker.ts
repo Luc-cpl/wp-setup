@@ -1,7 +1,7 @@
 import { ExecSyncOptions, execSync } from 'child_process';
 import { getProjectName } from '@/helpers/cli';
 
-import { ComposeExecInterface, DockerPsItem } from '@/interfaces/docker';
+import { ComposeExecInterface, DockerExecInterface, DockerPsItem } from '@/interfaces/docker';
 import { ConfigInterface } from '@/interfaces/setup';
 import { renderAndSave } from './template';
 
@@ -10,6 +10,17 @@ export const exec: ComposeExecInterface = async (config, command, options = { st
 	const projectName = getProjectName();
 	const dockerCommand = `docker compose -p ${projectName} ${files.map(f => `-f ${f}`).join(' ')} ${command}`;
 
+	try {
+		return execSync(dockerCommand, options);
+	} catch (e) {
+		const error = e as Error;
+		error.message = error.message.replace(`Command failed: ${dockerCommand}`, '');
+		throw error;
+	}
+}
+
+export const docker: DockerExecInterface = async (command, options = { stdio: 'inherit' }) => {
+	const dockerCommand = `docker ${command}`;
 	try {
 		return execSync(dockerCommand, options);
 	} catch (e) {
@@ -52,7 +63,13 @@ export const getServices = async (config: ConfigInterface) => {
 		 */
 		jsonStr = jsonStr.replace(/}\s*{/g, '},{');
 		jsonStr = jsonStr.startsWith('[') ? jsonStr : `[${jsonStr}]`;
-		return JSON.parse(jsonStr) as DockerPsItem[];
+
+		const services = JSON.parse(jsonStr) as DockerPsItem[];
+		return await Promise.all(services.map(async service => {
+			let image = (await docker(`inspect ${service.ID} --format '{{.Config.Image}}'`, { stdio: 'pipe' })).toString();
+			service.Image = image.replace(/\s/g, '');
+			return service;
+		}));
 	} catch (error: unknown) {
 		return [];
 	}
