@@ -10,15 +10,10 @@ export interface ComposeExecInterface {
 	(config: ConfigInterface, command: string, options?: ExecSyncOptions): Promise<string | Buffer>;
 }
 
-export interface DockerExecInterface {
-	(command: string, options?: ExecSyncOptions): Promise<string | Buffer>;
-}
-
 export interface DockerPsItem {
 	ID: string;
 	Name: string;
 	State: string;
 	Service: string;
 	Project: string;
-	Image: string;
 }

@@ -19,18 +19,10 @@ export const getVSCodeConfig = (config: ConfigInterface) => {
 			...config.editorConfig?.vscode ?? {},
 			extensions: [
 				...config.editorConfig?.vscode?.extensions ?? [],
-				'felixfbecker.php-debug',
+				'xdebug.php-debug',
 			],
-			'terminal.integrated.env.linux': {
-				...config.editorConfig?.vscode?.['terminal.integrated.env.linux'] ?? {},
-				'XDEBUG_CLIENT_HOST': 'localhost'
-			},
-			'terminal.integrated.env.osx': {
-				...config.editorConfig?.vscode?.['terminal.integrated.env.osx'] ?? {},
-				'XDEBUG_CLIENT_HOST': 'localhost'
-			},
-			'terminal.integrated.env.windows': {
-				...config.editorConfig?.vscode?.['terminal.integrated.env.windows'] ?? {},
+			remoteEnv: {
+				...config.editorConfig?.vscode?.remoteEnv ?? {},
 				'XDEBUG_CLIENT_HOST': 'localhost'
 			},
 		},
@@ -40,7 +32,7 @@ export const getVSCodeConfig = (config: ConfigInterface) => {
 }
 
 export const startVSCode = (config: ConfigInterface, service: DockerPsItem, workdir: string) => {
-	const vsConfig = config.editorConfig.vscode;
+	const vsConfig = { ...config.editorConfig.vscode, workspaceFolder: workdir };
 	const userHome = process.env.HOME ?? process.env.USERPROFILE ?? '';
 	const platform = process.platform;
 	const baseSettingsDir = platform === 'win32'
@@ -49,15 +41,14 @@ export const startVSCode = (config: ConfigInterface, service: DockerPsItem, work
 			? join(userHome, 'Library', 'Application Support')
 			: join(userHome, '.config');
 
-	const settingFileName = encodeURIComponent(service.Image) + '.json';
-	const settingsDir = join(
+	const settingsBaseDir = join(
 		baseSettingsDir,
-		'Code', 'User', 'globalStorage', 'ms-vscode-remote.remote-containers', 'imageConfigs',
-		settingFileName
+		'Code', 'User', 'globalStorage', 'ms-vscode-remote.remote-containers',
 	);
 
-	save(settingsDir, JSON.stringify(vsConfig, null, 2), true);
+	const settingFileName = service.Name + ".json";
+	save(join(settingsBaseDir, 'nameConfigs', settingFileName), JSON.stringify(vsConfig, null, 2), true);
 	const containerHex = containerIdToHex(service.ID);
-	const command = `code --folder-uri=vscode-remote://attached-container+${containerHex}${workdir ? workdir : '/var/www/html'}`;
+	const command = `code --sync=on --folder-uri=vscode-remote://attached-container+${containerHex}${workdir ? workdir : '/var/www/html'}`;
 	exec(command);
 }
