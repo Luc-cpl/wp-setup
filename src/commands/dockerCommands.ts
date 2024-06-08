@@ -4,7 +4,6 @@ import { join } from 'node:path';
 import { DockerPsItem, VolumeInterface } from '@/interfaces/docker';
 import { SetupInterface } from '@/interfaces/wordpress';
 import { parseVolume } from '@/helpers/docker';
-import { getJsonFile } from '@/helpers/fs';
 import { confirm } from '@/helpers/cli';
 import { deleteVolume, exec, getServices } from '@/services/docker';
 import { render } from '@/services/template';
@@ -77,7 +76,6 @@ export default class DockerCommands extends AbstractCommand {
 
 	public async run(service: string, command: string[], workdir: string|false = false) {
 		const services = (await this.exec('config --services', { stdio: 'pipe' })).toString().split('\n');
-		const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`);
 
 		if (!services.includes(service)) {
 			this.error(`The service "${service}" does not exist.`);

@@ -21,7 +21,11 @@ export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
  	return response;
 }
 
-export const getExternalVolumeFiles = async (volumes: string[]|VolumeInterface[], type: string, beforeCallback: Function): Promise<VolumeInterface[]> => {
+export const getExternalVolumeFiles = async (
+	volumes: string[]|VolumeInterface[],
+	type: string,
+	beforeCallback: (fileName: string, tmpFile: string) => void
+): Promise<VolumeInterface[]> => {
 	const tmpDir = path(`build/tmp/${type}`);
 	const destination = path(`build/${type}`);
 
