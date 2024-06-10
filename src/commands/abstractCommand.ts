@@ -1,9 +1,12 @@
 import { execSync } from 'child_process';
 import { exit } from 'process';
 import { ConfigInterface } from '@/interfaces/setup';
+import { VolumeInterface } from '@/interfaces/docker';
+import { getExternalVolumeFiles } from '@/helpers/docker';
 
 export default abstract class AbstractCommand {
 	private config = {} as ConfigInterface;
+	private parsedConfig = false;
 	protected mode = 'silent' as 'silent'|'verbose';
 
 	public constructor(config: ConfigInterface) {
@@ -22,27 +25,49 @@ export default abstract class AbstractCommand {
 		process.env.GID = gid;
 	}
 
-	protected getConfig = () => this.config;
-
-	protected print = (message: string, type: 'error'|'warn'|'success'|'info' = 'info') => {
-		if (this.mode === 'silent' && type !== 'error' && type !== 'success') {
-			return;
+	protected getConfig = async () => {
+		if (this.parsedConfig) {
+			return this.config;
 		}
 
-		if (this.mode === 'verbose') {
-			message = `[${type.toUpperCase()}] ${message}`;
-		}
+		const [plugins, themes, volumes] = await Promise.all(['plugins', 'themes', 'volumes'].map(async type =>{
+			const volumes = (this.config[type] ?? []) as string[]|VolumeInterface[];
+			const singularType = type.slice(0, -1);
+			const beforeCallback = (fileName: string, tmpFile: string) => {
+				this.info(`Downloading ${singularType}: ${fileName} on ${tmpFile}...`);
+			}
+			return getExternalVolumeFiles(volumes, type, beforeCallback);
+		}));
 
-		switch (type) {
+		this.config.plugins = plugins;
+		this.config.themes = themes;
+		this.config.volumes = volumes;
+
+		this.parsedConfig = true;
+		return this.config;
+	}
+
+	protected print = (message: string, type: 'error'|'warn'|'success'|'info'|'log' = 'log') => {
+				switch (type) {
 			case 'error':
-				return console.error(message);
+				return console.log('\x1b[31m%s\x1b[0m', message);
 			case 'warn':
-				return console.warn(message);
+				return console.log('\x1b[33m%s\x1b[0m', message);
 			case 'info':
-				return console.info(message);
+				return console.log('\x1b[34m%s\x1b[0m', message);
+			case 'success':
+				return console.log('\x1b[32m%s\x1b[0m', message);
 			default:
 				return console.log(message);
 		}
+	}
+
+	protected log = (message: string) => {
+		this.print(message);
+	}
+
+	protected info = (message: string) => {
+		this.print(message, 'info');
 	}
 
 	protected error = (message: string, shouldExit = true) => {
