@@ -1,12 +1,13 @@
 {
   "name": "wp-setup",
-  "version": "1.1.5",
-  "description": "The WordPress environment setup tool.",
+  "version": "1.2",
+  "description": "Easily create replicable local WordPress environments with Docker",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/Luc-cpl/wp-setup"
   },
+  "homepage": "http://lucascarvalho.site/wp-setup/",
   "keywords": [
     "cli",
     "wordpress",
