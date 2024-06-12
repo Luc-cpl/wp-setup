@@ -15,7 +15,7 @@ const packageJson = getJsonFile(`${process.cwd()}/package.json`) as { version: s
 const docker = new DockerCommands(setupFile);
 const maker = new MakerCommands(setupFile);
 
-program.version(packageJson?.version ?? '0.0.1');
+program.version('1.2.1');
 
 program.command('init')
   .description('Create the setup files for the environment.')
