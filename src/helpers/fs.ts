@@ -6,11 +6,24 @@ import { get } from 'https';
 import { rm as nodeRm } from 'fs/promises';
 import { ConfigInterface } from '@/interfaces/setup';
 import AdmZip from 'adm-zip';
+import { writeFileSync } from 'node:fs';
 
 export const path = (path = '') => {
+	const dirs = path.split('/');
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = dirname(__filename);
-	return join(__dirname, '../../', path);
+	return join(__dirname, '..', '..', ...dirs);
+}
+
+export const setupDir = () => {
+	const dir = join(process.cwd(), '.wp-setup');
+
+	if (!exists(dir)) {
+		createDir(dir);
+		writeFileSync(join(dir, '.gitignore'), '*');
+	}
+
+	return dir;
 }
 
 export const download = async (url: string, dest: string): Promise<WriteStream> => {

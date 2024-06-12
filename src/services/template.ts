@@ -1,12 +1,12 @@
 import { Edge } from 'edge.js'
 import { writeFileSync } from 'fs';
 
-import { createDir, path } from '@/helpers/fs';
+import { createDir, path, setupDir } from '@/helpers/fs';
+import { join } from 'path';
 
 export const render = async (template: string, options: Record<string, unknown> = {}) => {
 	const edge = Edge.create();
 	edge.mount(path('templates'));
-	options.root = path();
 	return edge.render(template, options);
 }
 
@@ -16,7 +16,7 @@ export const renderAndSave = async (template: string, file: string, options: Rec
 }
 
 export const save = async (file: string, content: string, project = false) => {
-	file = !project ? path('build/' + file) : file;
+	file = !project ? join(setupDir(), file) : file;
 
 	const folders = file.split('/').slice(0, -1);
 	createDir(folders.join('/'));

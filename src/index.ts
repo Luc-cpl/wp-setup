@@ -14,7 +14,7 @@ const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`) ?? {} as ConfigI
 const docker = new DockerCommands(setupFile);
 const maker = new MakerCommands(setupFile);
 
-program.version('1.2.1');
+program.version('1.2.2');
 
 program.command('init')
   .description('Create the setup files for the environment.')
