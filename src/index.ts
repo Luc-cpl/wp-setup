@@ -10,12 +10,11 @@ import DockerCommands from '@/commands/dockerCommands';
 import MakerCommands from '@/commands/makerCommands';
 
 const setupFile = getJsonFile(`${process.cwd()}/wp-setup.json`) ?? {} as ConfigInterface;
-const packageJson = getJsonFile(`${process.cwd()}/package.json`) as { version: string }|null;
 
 const docker = new DockerCommands(setupFile);
 const maker = new MakerCommands(setupFile);
 
-program.version('1.2.1');
+program.version('1.2.2');
 
 program.command('init')
   .description('Create the setup files for the environment.')

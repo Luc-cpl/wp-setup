@@ -28,11 +28,11 @@ export const getVSCodeConfig = (config: ConfigInterface) => {
 		},
 	};
 
-	return config.editorConfig.vscode;
+	return config.editorConfig?.vscode;
 }
 
 export const startVSCode = (config: ConfigInterface, service: DockerPsItem, workdir: string) => {
-	const vsConfig = { ...config.editorConfig.vscode, workspaceFolder: workdir };
+	const vsConfig = { ...config?.editorConfig?.vscode, workspaceFolder: workdir };
 	const userHome = process.env.HOME ?? process.env.USERPROFILE ?? '';
 	const platform = process.platform;
 	const baseSettingsDir = platform === 'win32'

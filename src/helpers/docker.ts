@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { VolumeInterface } from '@/interfaces/docker';
-import { download, exists, extract, path, rm } from './fs';
+import { download, exists, extract, path, rm, setupDir } from './fs';
 
 export const parseVolume = (value: string|VolumeInterface): VolumeInterface => {
 	if (typeof value !== 'string') {
@@ -27,7 +27,7 @@ export const getExternalVolumeFiles = async (
 	beforeCallback: (fileName: string, tmpFile: string) => void
 ): Promise<VolumeInterface[]> => {
 	const tmpDir = path(`build/tmp/${type}`);
-	const destination = path(`build/${type}`);
+	const destination = join(setupDir(), type);
 
 	const promises = volumes.map(parseVolume).map(async volume => {
 		if (!volume.host.startsWith('http')) {
