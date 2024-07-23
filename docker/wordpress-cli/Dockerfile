@@ -2,7 +2,7 @@ FROM node:22-alpine AS node
 
 FROM wordpress:cli
 
-ARG IMAGE_VERSION=1.1.0
+ARG IMAGE_VERSION=1.1.1
 
 ARG USER=www-data
 
