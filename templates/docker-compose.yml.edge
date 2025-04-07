@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   wp:
-    image: luccpl/wordpress-franken:1.0
+    image: luccpl/wordpress-franken:latest
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -34,7 +32,7 @@ services:
       @end
 
   wp-test:
-    image: luccpl/wordpress-franken:1.0
+    image: luccpl/wordpress-franken:latest
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -63,7 +61,7 @@ services:
       @end
 
   wp-cli:
-    image: luccpl/wordpress-cli:1.1
+    image: luccpl/wordpress-cli:latest
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -92,7 +90,7 @@ services:
       @end
 
   wp-test-cli:
-    image: luccpl/wordpress-cli:1.1
+    image: luccpl/wordpress-cli:latest
     user: "${UID}:${GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
