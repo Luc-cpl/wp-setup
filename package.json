@@ -1,6 +1,6 @@
 {
   "name": "wp-setup",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Easily create replicable local WordPress environments with Docker",
   "type": "module",
   "repository": {

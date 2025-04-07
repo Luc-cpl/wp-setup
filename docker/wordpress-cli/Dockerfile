@@ -1,8 +1,8 @@
 FROM node:22-alpine AS node
 
-FROM wordpress:cli
+FROM wordpress:cli-php8.4
 
-ARG IMAGE_VERSION=1.1.1
+ARG IMAGE_VERSION=1.2.0
 
 ARG USER=www-data
 

@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  wordpress:
+    build:
+      context: ./docker/wordpress-franken
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DEBUG=1
+      - SERVER_NAME=localhost
+      - XDEBUG_MODE=off
+      - XDEBUG_CLIENT_HOST=host.docker.internal
+      - XDEBUG_DISCOVERY_CLIENT_HOST=0
+    volumes:
+      - wordpress_data:/var/www/html
+    depends_on:
+      - db
+
+  wordpress-cli:
+    build:
+      context: ./docker/wordpress-cli
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+      - WORDPRESS_DEBUG=1
+      - SERVER_NAME=localhost
+    volumes:
+      - wordpress_data:/var/www/html
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  wordpress_data:
+  db_data: 

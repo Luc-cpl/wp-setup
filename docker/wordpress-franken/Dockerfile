@@ -1,6 +1,6 @@
-FROM dunglas/frankenphp:latest-php8.2
+FROM dunglas/frankenphp:php8.4
 
-ARG IMAGE_VERSION=1.0.2
+ARG IMAGE_VERSION=1.1.0
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN install-php-extensions \
